@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bitpunchlab.android.analyzer.MainActivity">
+    <item
+        android:id="@+id/wifi"
+        android:orderInCategory="100"
+        android:title="Wifi"
+        app:showAsAction="never" />
+</menu>
