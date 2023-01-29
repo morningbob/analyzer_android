@@ -4,28 +4,31 @@
     
     <data>
         <variable
-            name="scanResult"
+            name="device"
             type="android.net.wifi.ScanResult" />
+        <variable
+            name="clickListener"
+            type="com.bitpunchlab.android.analyzer.devices.WifiOnClickListener" />
     </data>
     
     <LinearLayout 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:onClick="@{() -> clickListener.onClick(device)}">
         
         <TextView
             android:id="@+id/scan_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@={scanResult.SSID}"/>
+            android:text="@={device.SSID}"/>
         
         <TextView
             android:id="@+id/scan_frequency"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@={scanResult.frequency + ``}"/>
-            
+            android:text="@={device.frequency + ``}"/>
     
     </LinearLayout>
 </layout>

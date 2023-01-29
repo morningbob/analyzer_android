@@ -21,6 +21,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.bitpunchlab.android.analyzer.R
 import com.bitpunchlab.android.analyzer.ScanResultAdapter
 import com.bitpunchlab.android.analyzer.databinding.FragmentWifiDevicesBinding
+import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModel
+import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModelFactory
 
 class WifiDevicesFragment : Fragment() {
 
@@ -42,7 +44,8 @@ class WifiDevicesFragment : Fragment() {
     ): View? {
         _binding = FragmentWifiDevicesBinding.inflate(inflater, container, false)
         wifiDeviceViewModel = ViewModelProvider(requireActivity(),
-            WifiDeviceViewModelFactory(requireActivity().application))
+            WifiDeviceViewModelFactory(requireActivity().application)
+        )
             .get(WifiDeviceViewModel::class.java)
         binding.lifecycleOwner = viewLifecycleOwner
         scanResultAdapter = ScanResultAdapter()

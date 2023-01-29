@@ -36,6 +36,6 @@
     <fragment
         android:id="@+id/devicesFragment"
         android:name="com.bitpunchlab.android.analyzer.devices.DevicesFragment"
-        android:label="fragment_devices"
+        android:label="Nearby Devices"
         tools:layout="@layout/fragment_devices" />
 </navigation>

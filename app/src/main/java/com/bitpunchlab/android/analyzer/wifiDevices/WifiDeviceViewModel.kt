@@ -1,4 +1,4 @@
-package com.bitpunchlab.android.analyzer.wifiDevices
+package com.bitpunchlab.android.analyzer.devices
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.util.Log
+import androidx.core.content.getSystemService
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,16 +22,6 @@ class WifiDeviceViewModel(application: Application) : AndroidViewModel(applicati
     var wifiManager : WifiManager? = null
     var scanWifiResults = MutableLiveData<List<ScanResult>>()
 
-
-    init {
-        wifiManager = getApplication<Application>().getSystemService(Context.WIFI_SERVICE) as WifiManager
-        //getApplication<Application>().registerReceiver(null, wifiReceiver)
-        //registerWifiReceiver()
-        Log.i("starting wifi vm", "init ran")
-    }
-
-    // need to unregister it
-/*
     private val wifiReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val success = intent?.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
@@ -46,6 +37,11 @@ class WifiDeviceViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    init {
+        wifiManager = getApplication<Application>().getSystemService<WifiManager>() as WifiManager
+        registerWifiReceiver()
+        Log.i("starting wifi vm", "init ran")
+    }
 
     private fun registerWifiReceiver() {
         Log.i("vm", "registering wifi receiver")
@@ -53,7 +49,7 @@ class WifiDeviceViewModel(application: Application) : AndroidViewModel(applicati
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
         getApplication<Application>().applicationContext.registerReceiver(wifiReceiver, intentFilter)
     }
-*/
+
     @SuppressLint("NotifyDataSetChanged", "MissingPermission")
     private fun scanSuccess() {
         Log.i("vm", "scanning was successful")

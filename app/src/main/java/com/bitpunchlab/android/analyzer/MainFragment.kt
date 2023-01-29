@@ -1,35 +1,26 @@
 package com.bitpunchlab.android.analyzer
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.net.wifi.ScanResult
-import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.bitpunchlab.android.analyzer.bluetoothDevices.BLEDeviceViewModel
+import com.bitpunchlab.android.analyzer.devices.BluetoothDeviceViewModel
+import com.bitpunchlab.android.analyzer.devices.BluetoothDeviceViewModelFactory
 import com.bitpunchlab.android.analyzer.databinding.FragmentMainBinding
-import com.bitpunchlab.android.analyzer.wifiDevices.WifiDeviceViewModel
-import com.bitpunchlab.android.analyzer.wifiDevices.WifiDeviceViewModelFactory
-import java.util.Scanner
+import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModel
+import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModelFactory
 
 
 class MainFragment : Fragment() {
@@ -39,9 +30,10 @@ class MainFragment : Fragment() {
     private lateinit var scanResultAdapter: ScanResultAdapter
     private var scanResults = MutableLiveData<List<ScanResult>>()
     private lateinit var bluetoothAdapter : BluetoothAdapter
-    private lateinit var bleDeviceViewModel : BLEDeviceViewModel
+    private lateinit var bleDeviceViewModel : BluetoothDeviceViewModel
     private lateinit var wifiDeviceViewModel: WifiDeviceViewModel
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -49,8 +41,9 @@ class MainFragment : Fragment() {
 
         _binding = FragmentMainBinding.inflate(inflater, container, false)
         scanResultAdapter = ScanResultAdapter()
-        bleDeviceViewModel = ViewModelProvider(requireActivity())
-            .get(BLEDeviceViewModel::class.java)
+        bleDeviceViewModel = ViewModelProvider(requireActivity(),
+            BluetoothDeviceViewModelFactory(requireActivity().application))
+            .get(BluetoothDeviceViewModel::class.java)
         wifiDeviceViewModel = ViewModelProvider(requireActivity(),
             WifiDeviceViewModelFactory(requireActivity().application))
             .get(WifiDeviceViewModel::class.java)
@@ -91,12 +84,6 @@ class MainFragment : Fragment() {
 
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
-
-
-
-
-
-
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

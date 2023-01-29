@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -21,10 +22,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bitpunchlab.android.analyzer.R
 import com.bitpunchlab.android.analyzer.ScanResultAdapter
+import com.bitpunchlab.android.analyzer.devices.BluetoothDeviceViewModel
+import com.bitpunchlab.android.analyzer.devices.BluetoothDeviceViewModelFactory
 import com.bitpunchlab.android.analyzer.databinding.FragmentDevicesBinding
 import com.bitpunchlab.android.analyzer.databinding.FragmentWifiDevicesBinding
-import com.bitpunchlab.android.analyzer.wifiDevices.WifiDeviceViewModel
-import com.bitpunchlab.android.analyzer.wifiDevices.WifiDeviceViewModelFactory
+import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModel
+import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModelFactory
 
 
 class DevicesFragment : Fragment() {
@@ -32,13 +35,16 @@ class DevicesFragment : Fragment() {
     private var _binding : FragmentDevicesBinding? = null
     private val binding get() = _binding!!
     private lateinit var wifiDeviceViewModel : WifiDeviceViewModel
-    private lateinit var scanWifiResultAdapter: ScanResultAdapter
+    private lateinit var bluetoothDeviceViewModel : BluetoothDeviceViewModel
+    private lateinit var wifiDeviceAdapter : WifiDeviceAdapter
+    private lateinit var bluetoothDeviceAdapter : BluetoothDeviceAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,30 +54,44 @@ class DevicesFragment : Fragment() {
         wifiDeviceViewModel = ViewModelProvider(requireActivity(),
             WifiDeviceViewModelFactory(requireActivity().application))
             .get(WifiDeviceViewModel::class.java)
+        bluetoothDeviceViewModel = ViewModelProvider(requireActivity(),
+            BluetoothDeviceViewModelFactory(requireActivity().application)
+        )
+            .get(BluetoothDeviceViewModel::class.java)
         binding.lifecycleOwner = viewLifecycleOwner
         // default to Wifi
-        scanWifiResultAdapter = ScanResultAdapter()
-        binding.scanResultRecycler.adapter = scanWifiResultAdapter
+        wifiDeviceAdapter = WifiDeviceAdapter( WifiOnClickListener { device ->
+            // to do
+        })
+        bluetoothDeviceAdapter = BluetoothDeviceAdapter(BluetoothClickListener { device ->
+            // to do
+        })
+        binding.wifiDeviceRecycler.adapter = wifiDeviceAdapter
+        binding.bluetoothDeviceRecycler.adapter = bluetoothDeviceAdapter
 
         //checkPermission(wifiPermissions)
-        registerWifiReceiver()
+        //registerWifiReceiver()
 
         binding.buttonWifi.setOnClickListener {
             processWifiScanningRequest()
         }
 
         binding.buttonBluetooth.setOnClickListener {
-
+            processBluetoothScanningRequest()
         }
 
-        binding.buttonScan.setOnClickListener {
-
-        }
 
         wifiDeviceViewModel.scanWifiResults.observe(viewLifecycleOwner, Observer { results ->
             results?.let {
-                scanWifiResultAdapter.submitList(results)
-                scanWifiResultAdapter.notifyDataSetChanged()
+                wifiDeviceAdapter.submitList(results)
+                wifiDeviceAdapter.notifyDataSetChanged()
+            }
+        })
+
+        bluetoothDeviceViewModel.bluetoothDevices.observe(viewLifecycleOwner, Observer { devices ->
+            devices?.let {
+                bluetoothDeviceAdapter.submitList(devices)
+                bluetoothDeviceAdapter.notifyDataSetChanged()
             }
         })
 
@@ -81,7 +101,7 @@ class DevicesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        requireActivity().unregisterReceiver(wifiReceiver)
+        //requireActivity().unregisterReceiver(wifiReceiver)
         //requireActivity().unregisterReceiver(bluetoothReceiver)
     }
 
@@ -121,7 +141,7 @@ class DevicesFragment : Fragment() {
     private fun processWifiScanningRequest() {
         Log.i("process scan request", "started")
         if (checkPermission(wifiPermissions)) {
-            binding.scanResultRecycler.adapter = scanWifiResultAdapter
+            //binding.scanResultRecycler.adapter = wifiDeviceAdapter
             wifiDeviceViewModel.wifiManager!!.startScan()
             Log.i("wifi fragment", "start scanning wifi")
         } else {
@@ -130,63 +150,28 @@ class DevicesFragment : Fragment() {
         }
     }
 
-    private fun processWifiScanningRequest1() {
+    private val bluetoothPermissions =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN
+            )
+        }
+
+    private fun processBluetoothScanningRequest() {
         Log.i("process scan request", "started")
-        if (checkPermission(wifiPermissions)) {
-            binding.scanResultRecycler.adapter = scanWifiResultAdapter
-            wifiDeviceViewModel.wifiManager!!.startScan()
+        if (checkPermission(bluetoothPermissions)) {
+            //binding.scanResultRecycler.adapter = bluetoothDeviceAdapter
+            bluetoothDeviceViewModel.scanBluetoothDevices()
             Log.i("wifi fragment", "start scanning wifi")
         } else {
             // request wifi permissions
-            wifiPermissionResultLauncher.launch(wifiPermissions)
+            wifiPermissionResultLauncher.launch(bluetoothPermissions)
         }
-    }
-
-
-    private fun registerWifiReceiver() {
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        context?.registerReceiver(wifiReceiver, intentFilter)
-    }
-
-    private val wifiReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            //intent?.let {
-            Log.i("main fragment", "onReceive called")
-            val success = intent?.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
-            if (success != null)
-                if (success) {
-                    scanSuccess()
-                } else {
-                    //scanFailure()
-                    // alert user the error
-                }//}
-
-        }
-    }
-
-    private val bluetoothReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val action: String? = intent?.action
-            if (action != null) {
-                when (action) {
-                    BluetoothDevice.ACTION_FOUND -> {
-                        // Discovery has found a device. Get the BluetoothDevice
-                        // object and its info from the Intent.
-                        val device: BluetoothDevice? =
-                            intent!!.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                        device?.let {
-                            //val deviceName = it.name
-                            //val deviceHardwareAddress = device.address // MAC address
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged", "MissingPermission")
-    private fun scanSuccess() {
-        wifiDeviceViewModel.scanWifiResults.value = wifiDeviceViewModel.wifiManager?.scanResults
     }
 }

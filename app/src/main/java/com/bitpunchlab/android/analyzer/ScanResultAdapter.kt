@@ -6,12 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bitpunchlab.android.analyzer.databinding.ItemScanResultBinding
+import com.bitpunchlab.android.analyzer.databinding.ItemWifiDeviceBinding
 
 class ScanResultAdapter : ListAdapter<ScanResult, ScanResultViewHolder>(ScanResultDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScanResultViewHolder {
         return ScanResultViewHolder(
-            ItemScanResultBinding
+            ItemWifiDeviceBinding
             .inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
@@ -20,9 +20,9 @@ class ScanResultAdapter : ListAdapter<ScanResult, ScanResultViewHolder>(ScanResu
     }
 }
 
-class ScanResultViewHolder(val binding: ItemScanResultBinding) : RecyclerView.ViewHolder(binding.root) {
+class ScanResultViewHolder(val binding: ItemWifiDeviceBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(item: ScanResult) {
-        binding.scanResult = item
+        binding.device = item
         binding.executePendingBindings()
     }
 }

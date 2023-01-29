@@ -14,11 +14,19 @@
             android:layout_height="match_parent"
             >
 
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_middle_line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5"/>
+
+
             <TextView
                 android:id="@+id/textview_devices"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Devices"
+                android:text="@string/devices"
                 android:textSize="30sp"
                 android:textColor="@color/black"
                 android:textStyle="bold"
@@ -28,6 +36,77 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
+                android:id="@+id/wifi_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@id/guide_middle_line"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textview_devices">
+
+                <TextView
+                    android:id="@+id/button_wifi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:text="@string/wifi"
+                    android:textAlignment="center"
+                    android:textColor="@color/clickable_text"
+                    android:textSize="20sp"
+                    android:clickable="true"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/wifiDeviceRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="30dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/bluetooth_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/guide_middle_line"
+                app:layout_constraintTop_toBottomOf="@id/textview_devices">
+
+                <TextView
+                    android:id="@+id/button_bluetooth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:text="@string/bluetooth"
+                    android:textColor="@color/clickable_text"
+                    android:textSize="20sp"
+                    android:textAlignment="center"
+                    android:clickable="true"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/bluetoothDeviceRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="30dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+</layout>
+<!--
+    <LinearLayout
                 android:id="@+id/choose_device_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -40,7 +119,7 @@
                 app:layout_constraintTop_toBottomOf="@id/textview_devices">
 
                 <Button
-                    android:id="@+id/button_wifi"
+                    android:id="@+id/button_wif"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/wifi"
@@ -63,7 +142,6 @@
                     android:textSize="20sp" />
 
             </LinearLayout>
-
 
             <Button
                 android:id="@+id/button_scan"
@@ -88,7 +166,5 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/button_scan" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </ScrollView>
-</layout>
+-->

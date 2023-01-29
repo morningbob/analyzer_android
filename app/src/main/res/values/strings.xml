@@ -14,4 +14,5 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="wifi">Wifi</string>
     <string name="ble">BLE</string>
+    <string name="devices">Devices</string>
 </resources>
