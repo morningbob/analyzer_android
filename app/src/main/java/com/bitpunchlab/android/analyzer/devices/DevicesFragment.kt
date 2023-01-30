@@ -18,17 +18,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bitpunchlab.android.analyzer.R
-import com.bitpunchlab.android.analyzer.ScanResultAdapter
-import com.bitpunchlab.android.analyzer.devices.BluetoothDeviceViewModel
-import com.bitpunchlab.android.analyzer.devices.BluetoothDeviceViewModelFactory
 import com.bitpunchlab.android.analyzer.databinding.FragmentDevicesBinding
-import com.bitpunchlab.android.analyzer.databinding.FragmentWifiDevicesBinding
-import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModel
-import com.bitpunchlab.android.analyzer.devices.WifiDeviceViewModelFactory
-
 
 class DevicesFragment : Fragment() {
 
@@ -62,15 +56,31 @@ class DevicesFragment : Fragment() {
         // default to Wifi
         wifiDeviceAdapter = WifiDeviceAdapter( WifiOnClickListener { device ->
             // to do
+            wifiDeviceViewModel.onDeviceClicked(device)
         })
         bluetoothDeviceAdapter = BluetoothDeviceAdapter(BluetoothClickListener { device ->
             // to do
+            bluetoothDeviceViewModel.onDeviceClicked(device)
         })
         binding.wifiDeviceRecycler.adapter = wifiDeviceAdapter
         binding.bluetoothDeviceRecycler.adapter = bluetoothDeviceAdapter
 
-        //checkPermission(wifiPermissions)
-        //registerWifiReceiver()
+        wifiDeviceViewModel.isScanningWifi.observe(viewLifecycleOwner, Observer { scanning ->
+            if (scanning) {
+                binding.textviewWifiStatus.text = "Scanning"
+            } else {
+                binding.textviewWifiStatus.text = "Not scanning"
+            }
+        })
+
+        bluetoothDeviceViewModel.isScanningBLE.observe(viewLifecycleOwner, Observer { scanning ->
+            if (scanning || bluetoothDeviceViewModel.isScanningBluetooth.value == true) {
+                binding.textviewBluetoothStatus.text = "Scanning"
+            } else {
+                binding.textviewBluetoothStatus.text = "Not scanning"
+            }
+        })
+
 
         binding.buttonWifi.setOnClickListener {
             processWifiScanningRequest()
@@ -95,14 +105,20 @@ class DevicesFragment : Fragment() {
             }
         })
 
+        wifiDeviceViewModel.chosenDevice.observe(viewLifecycleOwner, Observer { device ->
+            // to do
+        })
+
+        bluetoothDeviceViewModel.chosenDevice.observe(viewLifecycleOwner, Observer { device ->
+            // to do
+        })
+
         return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        //requireActivity().unregisterReceiver(wifiReceiver)
-        //requireActivity().unregisterReceiver(bluetoothReceiver)
     }
 
     private val wifiPermissionResultLauncher =
@@ -130,26 +146,6 @@ class DevicesFragment : Fragment() {
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
 
-    private fun checkPermission(permissions: Array<String>) : Boolean {
-        for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(requireContext(), permission) !=
-                PackageManager.PERMISSION_GRANTED) return false
-        }
-        return true
-    }
-
-    private fun processWifiScanningRequest() {
-        Log.i("process scan request", "started")
-        if (checkPermission(wifiPermissions)) {
-            //binding.scanResultRecycler.adapter = wifiDeviceAdapter
-            wifiDeviceViewModel.wifiManager!!.startScan()
-            Log.i("wifi fragment", "start scanning wifi")
-        } else {
-            // request wifi permissions
-            wifiPermissionResultLauncher.launch(wifiPermissions)
-        }
-    }
-
     private val bluetoothPermissions =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             arrayOf(
@@ -163,12 +159,35 @@ class DevicesFragment : Fragment() {
             )
         }
 
+    private fun checkPermission(permissions: Array<String>) : Boolean {
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(requireContext(), permission) !=
+                PackageManager.PERMISSION_GRANTED) return false
+        }
+        return true
+    }
+
+    private fun processWifiScanningRequest() {
+        Log.i("process scan request", "started")
+        if (checkPermission(wifiPermissions)) {
+            //binding.scanResultRecycler.adapter = wifiDeviceAdapter
+            wifiDeviceViewModel.wifiManager!!.startScan()
+            wifiDeviceViewModel.isScanningWifi.value = true
+            Log.i("wifi fragment", "start scanning wifi")
+        } else {
+            // request wifi permissions
+            wifiPermissionResultLauncher.launch(wifiPermissions)
+        }
+    }
+
     private fun processBluetoothScanningRequest() {
         Log.i("process scan request", "started")
         if (checkPermission(bluetoothPermissions)) {
             //binding.scanResultRecycler.adapter = bluetoothDeviceAdapter
-            bluetoothDeviceViewModel.scanBluetoothDevices()
-            Log.i("wifi fragment", "start scanning wifi")
+            //bluetoothDeviceViewModel.scanBluetoothDevices()
+            bluetoothDeviceViewModel.scanBLEDevices()
+            //isScanningBluetooth.value = true
+            Log.i("wifi fragment", "starxxxxxxxxxxxxt scanning wifi")
         } else {
             // request wifi permissions
             wifiPermissionResultLauncher.launch(bluetoothPermissions)

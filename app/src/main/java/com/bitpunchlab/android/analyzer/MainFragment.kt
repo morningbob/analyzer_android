@@ -27,40 +27,15 @@ class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-    private lateinit var scanResultAdapter: ScanResultAdapter
-    private var scanResults = MutableLiveData<List<ScanResult>>()
-    private lateinit var bluetoothAdapter : BluetoothAdapter
-    private lateinit var bleDeviceViewModel : BluetoothDeviceViewModel
-    private lateinit var wifiDeviceViewModel: WifiDeviceViewModel
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
         _binding = FragmentMainBinding.inflate(inflater, container, false)
-        scanResultAdapter = ScanResultAdapter()
-        bleDeviceViewModel = ViewModelProvider(requireActivity(),
-            BluetoothDeviceViewModelFactory(requireActivity().application))
-            .get(BluetoothDeviceViewModel::class.java)
-        wifiDeviceViewModel = ViewModelProvider(requireActivity(),
-            WifiDeviceViewModelFactory(requireActivity().application))
-            .get(WifiDeviceViewModel::class.java)
 
         setupMenu()
-
-        // get the wifi manager here, if the user scans for Wifi,
-        // we'll start the scanning.
-        //wifiDeviceViewModel.wifiManager = requireActivity().getSystemService(Context.WIFI_SERVICE) as WifiManager
-        //registerWifiReceiver()
-
-        wifiDeviceViewModel.scanWifiResults.observe(viewLifecycleOwner, Observer { results ->
-            results?.let {
-                scanResultAdapter.submitList(results)
-                scanResultAdapter.notifyDataSetChanged()
-            }
-        })
 
         return binding.root
 
@@ -74,7 +49,7 @@ class MainFragment : Fragment() {
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.wifi -> {
+                    R.id.nearbyDevices -> {
                         findNavController().navigate(R.id.toDeviceListAction)
                         true
                     }
@@ -93,8 +68,6 @@ class MainFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        //requireActivity().unregisterReceiver(wifiReceiver)
-        //requireActivity().unregisterReceiver(bluetoothReceiver)
     }
 
     private fun getBatteryLevel() {
@@ -113,8 +86,9 @@ class MainFragment : Fragment() {
         val batteryPercentage = (level * 100) / scale
 
         Log.i("battery level", "got % $batteryPercentage")
-        //} else
     }
+
+
 
 }
 

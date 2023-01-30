@@ -5,23 +5,39 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import java.util.*
+import kotlin.collections.ArrayList
 
 class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(application) {
 
     private var bluetoothManager : BluetoothManager
     private var bluetoothAdapter : BluetoothAdapter
+    private var bluetoothLeScanner : BluetoothLeScanner
+    private val SCAN_PERIOD: Long = 100000
     var bluetoothDevices = MutableLiveData<ArrayList<BluetoothDevice>>()
 
+    var _chosenDevice = MutableLiveData<BluetoothDevice?>()
+    val chosenDevice get() = _chosenDevice
+
+    var isScanningBluetooth = MutableLiveData<Boolean>(false)
+    var isScanningBLE = MutableLiveData<Boolean>(false)
+
+    // for bluetooth devices (not BLE devices)
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action: String? = intent?.action
@@ -40,21 +56,31 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
                         }
 
                     }
+                    //BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                    //    Log.i("bluetooth receiver", "discovery finished detected")
+                    //}
                 }
             }
         }
     }
 
     init {
+        // for bluetooth devices (not BLE devices)
         bluetoothManager = getApplication<Application>().getSystemService<BluetoothManager>() as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
         if (bluetoothAdapter != null) {
             Log.i("bluetooth vm", "got adapter")
         }
-
+        // for bluetooth devices (not BLE devices)
         val intentFilter = IntentFilter()
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND)
         getApplication<Application>().applicationContext.registerReceiver(bluetoothReceiver, intentFilter)
+
+        // get le scanner
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        bluetoothLeScanner?.let {
+            Log.i("bluetooth vm init", "got le scanner")
+        }
     }
 
     fun addBluetoothDevice(device: BluetoothDevice) {
@@ -76,14 +102,70 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
             bluetoothDevices.value = currentList
         }
     }
-
+    // for bluetooth devices (not BLE devices)
+    // I'll stop scanning, after 1.30 min.
     @SuppressLint("MissingPermission")
     fun scanBluetoothDevices() {
         bluetoothAdapter.startDiscovery()
+        val task = object : TimerTask() {
+            override fun run() {
+                bluetoothAdapter.cancelDiscovery()
+                isScanningBluetooth.postValue(false)
+            }
+        }
+
+        Timer().schedule(task, 90000)
+        isScanningBluetooth.value = true
+    }
+
+    // for BLE devices (not Bluetooth devices)
+    @SuppressLint("MissingPermission")
+    fun scanBLEDevices() {
+        if (isScanningBluetooth.value == false) {
+            bluetoothLeScanner.startScan(scanCallback)
+            isScanningBLE.value = true
+            Handler(Looper.getMainLooper()).postDelayed({
+                isScanningBLE.postValue(false)
+                bluetoothLeScanner.stopScan(scanCallback)
+                bluetoothAdapter.startDiscovery()
+                isScanningBluetooth.postValue(true)
+            }, SCAN_PERIOD)
+        }
+    }
+
+    // for BLE devices (not Bluetooth devices)
+    private val scanCallback = object : ScanCallback() {
+        override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+            super.onBatchScanResults(results)
+            results?.let {
+                for (item in results) {
+                    addBluetoothDevice(item.device)
+                }
+            }
+        }
+
+        override fun onScanResult(callbackType: Int, result: ScanResult?) {
+            super.onScanResult(callbackType, result)
+            result?.device?.let { device ->
+                Log.i("one by one", "added a device")
+                addBluetoothDevice(device)
+            }
+        }
+
+        override fun onScanFailed(errorCode: Int) {
+            super.onScanFailed(errorCode)
+            Log.i("scan callback", "there is a scanning error $errorCode")
+        }
     }
 
 
+    fun onDeviceClicked(device: BluetoothDevice) {
+        _chosenDevice.value = device
+    }
 
+    fun finishDevice(device: BluetoothDevice) {
+        _chosenDevice.value = null
+    }
 }
 
 class BluetoothDeviceViewModelFactory(private val application: Application)

@@ -14,13 +14,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.bitpunchlab.android.analyzer.ScanResultAdapter
 
 class WifiDeviceViewModel(application: Application) : AndroidViewModel(application) {
 
     //private lateinit var scanResultAdapter: ScanResultAdapter
     var wifiManager : WifiManager? = null
     var scanWifiResults = MutableLiveData<List<ScanResult>>()
+
+    var _chosenDevice = MutableLiveData<ScanResult?>()
+    val chosenDevice get() = _chosenDevice
+
+    var isScanningWifi = MutableLiveData<Boolean>(false)
 
     private val wifiReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -54,6 +58,15 @@ class WifiDeviceViewModel(application: Application) : AndroidViewModel(applicati
     private fun scanSuccess() {
         Log.i("vm", "scanning was successful")
         scanWifiResults.value = wifiManager?.scanResults
+        isScanningWifi.value = false
+    }
+
+    fun onDeviceClicked(device: ScanResult) {
+        _chosenDevice.value = device
+    }
+
+    fun finishDevice(device: ScanResult) {
+        _chosenDevice.value = null
     }
 }
 

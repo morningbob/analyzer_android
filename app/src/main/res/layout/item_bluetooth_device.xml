@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -11,9 +12,18 @@
             type="com.bitpunchlab.android.analyzer.devices.BluetoothClickListener" />
     </data>
 
+    <androidx.cardview.widget.CardView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="@color/bluetooth_device_item_background"
+        app:cardCornerRadius="10dp"
+        tools:context=".devices.DeviceFragment">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:orientation="vertical"
         android:onClick="@{ () -> clickListener.onClick(device) }">
 
@@ -30,4 +40,6 @@
             android:text="@{device.address}" />
 
     </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 </layout>

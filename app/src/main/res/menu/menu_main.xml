@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.bitpunchlab.android.analyzer.MainActivity">
     <item
-        android:id="@+id/wifi"
+        android:id="@+id/nearbyDevices"
         android:orderInCategory="100"
-        android:title="Wifi"
+        android:title="Nearby Devices"
         app:showAsAction="never" />
 </menu>
