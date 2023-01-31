@@ -13,4 +13,5 @@
     <string name="wifi">Wifi</string>
     <string name="ble">BLE</string>
     <string name="devices">Devices</string>
+    <string name="get_location">Get Location</string>
 </resources>

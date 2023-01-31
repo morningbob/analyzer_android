@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/MainFragment"
-        android:name="com.bitpunchlab.android.analyzer.MainFragment"
+        android:name="com.bitpunchlab.android.analyzer.main.MainFragment"
         android:label="Main Page"
         tools:layout="@layout/fragment_main">
 
