@@ -3,27 +3,41 @@ package com.bitpunchlab.android.analyzer.main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.BatteryManager
-import android.os.Bundle
-import android.os.Environment
-import android.os.StatFs
+import android.location.LocationManager
+import android.location.LocationRequest
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
+import android.net.wifi.WifiManager
+import android.os.*
 import android.util.Log
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bitpunchlab.android.analyzer.R
 import com.bitpunchlab.android.analyzer.databinding.FragmentMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.security.Permissions
 
 
@@ -32,7 +46,12 @@ class MainFragment : Fragment() {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
     private lateinit var fusedLocationClient : FusedLocationProviderClient
-    private var userLocation : Location? = null
+    private var userLocation = MutableLiveData<Location?>()
+    private var connectivityManager: ConnectivityManager? = null
+    private var isWifiConn: Boolean = false
+    private var isMobileConn: Boolean = false
+    private var wifiName = MutableLiveData<String?>()
+
 
     @SuppressLint("MissingPermission", "SetTextI18n")
     override fun onCreateView(
@@ -44,8 +63,14 @@ class MainFragment : Fragment() {
 
         setupMenu()
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        connectivityManager = requireContext().getSystemService<ConnectivityManager>()
+
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.userLocation = userLocation
+        //binding.userLocation = userLocation
+        //setupNetworkCallback()
+        // to get the name of the wifi connection, if there is one
+        connectivityManager?.registerNetworkCallback(networkRequest, networkCallback)
 
         val internalCapacity = getInternalStorageCapacity()
         val internalTotal = internalCapacity.first
@@ -60,17 +85,14 @@ class MainFragment : Fragment() {
         binding.textviewRamSize.text = formatSize(getRAMSize().second)
 
         if (checkPermission(locationPermissions)) {
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-
-            fusedLocationClient.lastLocation.addOnSuccessListener { location : Location? ->
-                Log.i("fused client", "latitude: ${location?.latitude}, longitude: ${location?.longitude}")
-                userLocation = location
-            }
+            prepareLocation()
+            val enabled = isLocationEnabled()
+            Log.i("upon start", "location is enabled? $enabled")
             // show location
             //binding.textviewLatitude.text = "latitude: ${userLocation?.latitude}"
-            //binding.textviewLongitide.text = "longitude: ${userLocation?.longitude}"
+            //binding.textviewLongitude.text = "longitude: ${userLocation?.longitude}"
             binding.textviewLatitude.visibility = View.VISIBLE
-            binding.textviewLongitide.visibility = View.VISIBLE
+            binding.textviewLongitude.visibility = View.VISIBLE
             binding.textviewGetLocation.visibility = View.GONE
         } else {
             binding.textviewGetLocation.setOnClickListener {
@@ -78,9 +100,24 @@ class MainFragment : Fragment() {
                 permissionsResultLauncher.launch(locationPermissions)
             }
             binding.textviewLatitude.visibility = View.GONE
-            binding.textviewLongitide.visibility = View.GONE
+            binding.textviewLongitude.visibility = View.GONE
             binding.textviewGetLocation.visibility = View.VISIBLE
         }
+
+        binding.networkStatus.text = "Active: ${checkActiveNetwork()}"
+        //binding.networkName.text = wifiName.value ?: ""
+        wifiName.observe(viewLifecycleOwner, Observer { name ->
+            name?.let {
+                binding.networkName.text = name
+            }
+        })
+
+        userLocation.observe(viewLifecycleOwner, Observer { location ->
+            binding.userLocation = location
+            binding.textviewLatitude.text = "lat: ${formatCoordinate(location!!.latitude)}"
+            binding.textviewLongitude.text = "lng: ${formatCoordinate(location!!.longitude)}"
+        })
+
 
 
         return binding.root
@@ -215,7 +252,118 @@ class MainFragment : Fragment() {
     }
 
 
+    @SuppressLint("MissingPermission")
+    private suspend fun findCurrentLocation() : Location? =
+        suspendCancellableCoroutine<Location?> { cancellableContinuation ->
+            fusedLocationClient.lastLocation.addOnCompleteListener { task ->
+                //Log.i("fused client", "latitude: ${location?.latitude}, longitude: ${location?.longitude}")
+                //userLocation = location
+                if (task.isSuccessful && task.result != null) {
+                    //userLocation = task.result
+                    cancellableContinuation.resume(task.result) {}
+                } else {
+                    Log.i("fused Location", "error getting location")
+                    cancellableContinuation.resume(null) {}
+                }
+            }
+        }
 
+    // if we got the permissions, we execute find location,
+    // and show the lat lng
+    private fun prepareLocation() {
+        CoroutineScope(Dispatchers.IO).launch {
+            userLocation.postValue(findCurrentLocation())
+            //Log.i("prepare location")
+        }
+    }
+
+    private fun isLocationEnabled() : Boolean{
+        val locationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun formatCoordinate(cor: Double) : String {
+        val corString = cor.toString()
+        return corString.substring(0, 7)
+    }
+
+    // this function checks what the network is, wifi, or mobile
+    private fun checkActiveNetwork() : String {
+        val network = connectivityManager?.activeNetwork
+        // network here represent if there is a network
+        // that means, it is available
+        if (network != null) {
+            connectivityManager
+            val activeNetworkCap = connectivityManager!!.getNetworkCapabilities(network)
+
+            // here, check if it is connected
+            when {
+                activeNetworkCap?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true -> return "Wifi"
+                activeNetworkCap?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true -> return "Mobile"
+                else -> return "None"
+            }
+        }
+        return "None"
+
+    }
+
+    // use this method to get wifi name before api Q, 29
+    private fun getNameWifi() {
+        val wifiManager = requireContext().getSystemService<WifiManager>()
+        wifiManager
+    }
+
+    private val networkRequest = NetworkRequest.Builder()
+        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+        .build()
+
+    private val networkCallback = object : NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            super.onAvailable(network)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.Q)
+        override fun onCapabilitiesChanged(
+            network: Network,
+            networkCapabilities: NetworkCapabilities
+        ) {
+            super.onCapabilitiesChanged(network, networkCapabilities)
+            val wifiIno = networkCapabilities.transportInfo as WifiInfo
+            wifiIno
+            wifiName.postValue(wifiIno.ssid)
+        }
+    }
+
+        private fun setupNetworkCallback() {
+
+
+    }
+/*
+    private fun getNewLocation() {
+        val locationRequest = com.google.android.gms.location.LocationRequest()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 0
+        locationRequest.fastestInterval = 0
+        locationRequest.numUpdates = 2
+        fusedLocationClient!!.requestLocationUpdates(
+            locationRequest, locationCallback, null
+        )
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getNewLocation(){
+        locationRequest = LocationRequest()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 0
+        locationRequest.fastestInterval = 0
+        locationRequest.numUpdates = 2
+        fusedLocationProviderClient!!.requestLocationUpdates(
+            locationRequest, locationCallback, null
+        )
+
+    }
+
+ */
 }
 
 /*

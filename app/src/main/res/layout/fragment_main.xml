@@ -20,6 +20,13 @@
             android:layout_height="match_parent"
             tools:context=".main.MainFragment">
 
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_first_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.45"/>
+
             <ImageView
                 android:id="@+id/art_home"
                 android:layout_width="100dp"
@@ -76,7 +83,7 @@
                         android:id="@+id/textview_internal_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="0dp"
                         tools:text="10"
                         android:textColor="@color/clickable_text"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -87,7 +94,7 @@
                         android:id="@+id/textview_external_storage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="5dp"
                         android:text="External"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -97,7 +104,7 @@
                         android:id="@+id/textview_external_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="0dp"
                         tools:text="10"
                         android:textColor="@color/clickable_text"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -107,6 +114,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ram_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -138,13 +146,14 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/location_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:gravity="center_horizontal"
-                app:layout_constraintTop_toBottomOf="@id/storage_layout"
+                app:layout_constraintTop_toBottomOf="@id/guide_first_row"
                 app:layout_constraintStart_toStartOf="parent"
                 >
 
@@ -169,21 +178,60 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/clickable_text"
-                    android:text="@={userLocation.latitude + ``}"
+
                     android:visibility="gone"/>
 
                 <TextView
-                    android:id="@+id/textview_longitide"
+                    android:id="@+id/textview_longitude"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/clickable_text"
-                    android:text="@={userLocation.longitude + ``}"
+
                     android:visibility="gone"/>
 
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/signal_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="50dp"
+                android:orientation="vertical"
+                app:layout_constraintStart_toEndOf="@id/location_layout"
+                app:layout_constraintTop_toBottomOf="@id/guide_first_row">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ram_layout"
+                    app:srcCompat="@drawable/wifi"
+                    tools:srcCompat="@drawable/wifi" />
+
+                <TextView
+                    android:id="@+id/network_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/clickable_text"
+                    android:text="Active: None"/>
+
+                <TextView
+                    android:id="@+id/network_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
 
 </layout>
+<!--
+    android:text="@{`lat: ` + userLocation.latitude}"
+    android:text="@{`lng: ` + userLocation.longitude}"
+-->
