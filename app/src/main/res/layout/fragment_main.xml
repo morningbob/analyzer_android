@@ -25,7 +25,43 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintGuide_percent="0.45"/>
+                app:layout_constraintGuide_percent="0.20"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_second_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.40"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_third_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.60"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_first_half_column"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5"/>
+
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_first_third_column"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.33"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_second_third_column"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.67"/>
 
             <ImageView
                 android:id="@+id/art_home"
@@ -38,24 +74,16 @@
                 app:srcCompat="@drawable/search"
                 tools:srcCompat="@drawable/search" />
 
-            <TextView
-                android:id="@+id/textview_process"
-                android:layout_width="300dp"
-                android:layout_height="30dp"
-                android:text="no process"
-                android:layout_marginTop="50dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/art_home" />
-
             <LinearLayout
                 android:id="@+id/storage_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+
                 android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@+id/guide_second_row"
+                app:layout_constraintEnd_toStartOf="@+id/guide_first_half_column"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textview_process">
+                app:layout_constraintTop_toBottomOf="@id/guide_first_row">
 
                 <ImageView
                     android:layout_width="80dp"
@@ -74,42 +102,30 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="0dp"
-                        android:text="Internal"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textview_process" />
+                        android:text="Internal" />
 
                     <TextView
                         android:id="@+id/textview_internal_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="0dp"
-                        tools:text="10"
                         android:textColor="@color/clickable_text"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textview_internal_storage" />
+                        tools:text="10" />
 
                     <TextView
                         android:id="@+id/textview_external_storage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="External"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textview_internal_size" />
+                        android:text="External" />
 
                     <TextView
                         android:id="@+id/textview_external_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="0dp"
-                        tools:text="10"
                         android:textColor="@color/clickable_text"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textview_external_storage" />
+                        tools:text="10" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -117,10 +133,12 @@
                 android:id="@+id/ram_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 android:orientation="horizontal"
-                android:layout_marginLeft="30dp"
-                app:layout_constraintStart_toEndOf="@+id/storage_layout"
-                app:layout_constraintTop_toBottomOf="@id/textview_process">
+                app:layout_constraintBottom_toTopOf="@+id/guide_second_row"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/guide_first_half_column"
+                app:layout_constraintTop_toBottomOf="@id/guide_first_row">
 
                 <ImageView
                     android:layout_width="80dp"
@@ -131,7 +149,8 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -141,7 +160,7 @@
                         android:id="@+id/textview_ram_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/clickable_text"/>
+                        android:textColor="@color/clickable_text" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -150,11 +169,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
+
                 android:gravity="center_horizontal"
-                app:layout_constraintTop_toBottomOf="@id/guide_first_row"
+                app:layout_constraintTop_toBottomOf="@id/guide_second_row"
+                app:layout_constraintBottom_toTopOf="@id/guide_third_row"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/guide_first_third_column"
                 >
 
                 <ImageView
@@ -195,11 +215,12 @@
                 android:id="@+id/signal_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="50dp"
+
                 android:orientation="vertical"
-                app:layout_constraintStart_toEndOf="@id/location_layout"
-                app:layout_constraintTop_toBottomOf="@id/guide_first_row">
+                app:layout_constraintBottom_toTopOf="@id/guide_third_row"
+                app:layout_constraintEnd_toStartOf="@+id/guide_second_third_column"
+                app:layout_constraintStart_toEndOf="@id/guide_first_third_column"
+                app:layout_constraintTop_toBottomOf="@id/guide_second_row">
 
                 <ImageView
                     android:layout_width="70dp"
@@ -214,17 +235,57 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:textColor="@color/clickable_text"
-                    android:text="Active: None"/>
+                    android:text="Active: None"
+                    android:textColor="@color/clickable_text" />
 
                 <TextView
                     android:id="@+id/network_name"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/blue_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
+                android:orientation="vertical"
+                app:layout_constraintBottom_toTopOf="@+id/guide_third_row"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/guide_second_third_column"
+                app:layout_constraintTop_toBottomOf="@id/guide_second_row">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:srcCompat="@drawable/bluetooth"
+                    tools:srcCompat="@drawable/bluetooth" />
+
+                <TextView
+                    android:id="@+id/blue_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="Active: None"
+                    android:textColor="@color/clickable_text" />
+
+                <TextView
+                    android:id="@+id/blue_device"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Device: None"
+                    android:textColor="@color/clickable_text" />
+
+                <TextView
+                    android:id="@+id/button_check_blue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:clickable="true"
+                    android:text="@string/check" />
+
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

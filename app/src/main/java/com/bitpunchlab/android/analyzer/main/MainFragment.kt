@@ -3,6 +3,8 @@ package com.bitpunchlab.android.analyzer.main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -38,6 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.lang.reflect.Method
 import java.security.Permissions
 
 
@@ -51,6 +54,7 @@ class MainFragment : Fragment() {
     private var isWifiConn: Boolean = false
     private var isMobileConn: Boolean = false
     private var wifiName = MutableLiveData<String?>()
+    private var bluetoothName = MutableLiveData<String?>()
 
 
     @SuppressLint("MissingPermission", "SetTextI18n")
@@ -116,6 +120,14 @@ class MainFragment : Fragment() {
             binding.userLocation = location
             binding.textviewLatitude.text = "lat: ${formatCoordinate(location!!.latitude)}"
             binding.textviewLongitude.text = "lng: ${formatCoordinate(location!!.longitude)}"
+        })
+
+        bluetoothName.observe(viewLifecycleOwner, Observer { name ->
+            if (name != null) {
+                binding.blueStatus.text = "Connected: $name"
+            } else {
+                binding.blueStatus.text = "Not Connected"
+            }
         })
 
 
@@ -329,15 +341,54 @@ class MainFragment : Fragment() {
         ) {
             super.onCapabilitiesChanged(network, networkCapabilities)
             val wifiIno = networkCapabilities.transportInfo as WifiInfo
-            wifiIno
+
             wifiName.postValue(wifiIno.ssid)
         }
     }
 
-        private fun setupNetworkCallback() {
+    private val bluetoothPermissions =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN
+            )
+        }
 
+    private fun prepareBluetooth() {
+        if (checkPermission(bluetoothPermissions)) {
 
+        }
     }
+
+    @SuppressLint("MissingPermission")
+    private fun getConnectedBluetoothDevice() : String? {
+        val bluetoothManager = requireContext().getSystemService<BluetoothManager>()
+        val pairedDevices = bluetoothManager?.adapter?.bondedDevices
+        Log.i("get paired devices", pairedDevices?.size.toString())
+        //val connectedDevices = bluetoothManager?.getConnectedDevices()
+        pairedDevices?.map { device ->
+            if (isConnected(device)) {
+                return device.name
+            }
+        }
+        return null
+    }
+
+    // this method is used to test if the device is connected
+    private fun isConnected(device: BluetoothDevice) : Boolean {
+        return try {
+            val method: Method = device.javaClass.getMethod("isConnected")
+            method.invoke(device) as Boolean
+        } catch (e: java.lang.Exception) {
+            throw java.lang.IllegalStateException(e)
+        }
+    }
+
 /*
     private fun getNewLocation() {
         val locationRequest = com.google.android.gms.location.LocationRequest()
