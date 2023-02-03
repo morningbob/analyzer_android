@@ -42,6 +42,13 @@
                 app:layout_constraintGuide_percent="0.60"/>
 
             <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guide_fourth_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.80"/>
+
+            <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guide_first_half_column"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -71,14 +78,41 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/guide_first_row"
                 app:srcCompat="@drawable/search"
                 tools:srcCompat="@drawable/search" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/art_home"
+                app:layout_constraintBottom_toTopOf="@id/guide_first_row">
+
+                <ImageView
+                    android:id="@+id/art_battery"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    app:srcCompat="@drawable/battery"
+                    tools:srcCompat="@drawable/battery"
+                    />
+
+                <TextView
+                    android:id="@+id/battery_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/clickable_text"
+                    tools:text="16"/>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/storage_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toTopOf="@+id/guide_second_row"
                 app:layout_constraintEnd_toStartOf="@+id/guide_first_half_column"
@@ -95,6 +129,7 @@
                     android:id="@+id/storage_details"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -133,7 +168,6 @@
                 android:id="@+id/ram_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toTopOf="@+id/guide_second_row"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -149,7 +183,8 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_marginLeft="15dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -169,7 +204,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-
                 android:gravity="center_horizontal"
                 app:layout_constraintTop_toBottomOf="@id/guide_second_row"
                 app:layout_constraintBottom_toTopOf="@id/guide_third_row"
@@ -198,7 +232,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/clickable_text"
-
                     android:visibility="gone"/>
 
                 <TextView
@@ -206,7 +239,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/clickable_text"
-
                     android:visibility="gone"/>
 
             </LinearLayout>
@@ -215,8 +247,8 @@
                 android:id="@+id/signal_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:orientation="vertical"
+                android:gravity="center_horizontal"
                 app:layout_constraintBottom_toTopOf="@id/guide_third_row"
                 app:layout_constraintEnd_toStartOf="@+id/guide_second_third_column"
                 app:layout_constraintStart_toEndOf="@id/guide_first_third_column"
@@ -249,7 +281,6 @@
                 android:id="@+id/blue_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:orientation="vertical"
                 app:layout_constraintBottom_toTopOf="@+id/guide_third_row"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -268,6 +299,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="Active: None"
+                    android:visibility="gone"
                     android:textColor="@color/clickable_text" />
 
                 <TextView
@@ -275,6 +307,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Device: None"
+                    android:visibility="gone"
                     android:textColor="@color/clickable_text" />
 
                 <TextView
@@ -284,6 +317,59 @@
                     android:textColor="@color/clickable_text"
                     android:clickable="true"
                     android:text="@string/check" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@id/guide_first_third_column"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/guide_third_row"
+                app:layout_constraintBottom_toTopOf="@+id/guide_fourth_row">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:srcCompat="@drawable/dual"
+                    tools:srcCompat="@drawable/dual" />
+
+                <TextView
+                    android:id="@+id/sim_card_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/clickable_text"
+                    />
+
+                <TextView
+                    android:id="@+id/sim_line"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/sim_carrier_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/sim_signal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/sim_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 

@@ -20,6 +20,10 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.*
+import android.telecom.TelecomManager
+import android.telephony.SignalStrength
+import android.telephony.TelephonyManager
+import android.text.style.TtsSpan.TelephoneBuilder
 import android.util.Log
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -55,6 +59,8 @@ class MainFragment : Fragment() {
     private var isMobileConn: Boolean = false
     private var wifiName = MutableLiveData<String?>()
     private var bluetoothName = MutableLiveData<String?>()
+    private var isLocationPermissionGranted = MutableLiveData<Boolean>(false)
+    private var isBluetoothPermissionGranted = MutableLiveData<Boolean>(false)
 
 
     @SuppressLint("MissingPermission", "SetTextI18n")
@@ -75,6 +81,8 @@ class MainFragment : Fragment() {
         //setupNetworkCallback()
         // to get the name of the wifi connection, if there is one
         connectivityManager?.registerNetworkCallback(networkRequest, networkCallback)
+        prepareSimCard()
+        prepareBattery()
 
         val internalCapacity = getInternalStorageCapacity()
         val internalTotal = internalCapacity.first
@@ -95,17 +103,11 @@ class MainFragment : Fragment() {
             // show location
             //binding.textviewLatitude.text = "latitude: ${userLocation?.latitude}"
             //binding.textviewLongitude.text = "longitude: ${userLocation?.longitude}"
-            binding.textviewLatitude.visibility = View.VISIBLE
-            binding.textviewLongitude.visibility = View.VISIBLE
-            binding.textviewGetLocation.visibility = View.GONE
+
+            //binding.textviewGetLocation.visibility = View.GONE
         } else {
-            binding.textviewGetLocation.setOnClickListener {
-                //checkPermission(locationPermissions)
-                permissionsResultLauncher.launch(locationPermissions)
-            }
-            binding.textviewLatitude.visibility = View.GONE
-            binding.textviewLongitude.visibility = View.GONE
-            binding.textviewGetLocation.visibility = View.VISIBLE
+
+            //binding.textviewGetLocation.visibility = View.VISIBLE
         }
 
         binding.networkStatus.text = "Active: ${checkActiveNetwork()}"
@@ -115,6 +117,17 @@ class MainFragment : Fragment() {
                 binding.networkName.text = name
             }
         })
+
+        // prepare bluetooth display
+        if (checkPermission(bluetoothPermissions)) {
+            //binding.blueStatus.visibility = View.VISIBLE
+            //binding.blueDevice.visibility = View.VISIBLE
+            //binding.buttonCheckBlue.visibility = View.GONE
+        } else {
+            //binding.buttonCheckBlue.visibility = View.VISIBLE
+            //binding.blueStatus.visibility = View.GONE
+            //binding.blueDevice.visibility = View.GONE
+        }
 
         userLocation.observe(viewLifecycleOwner, Observer { location ->
             binding.userLocation = location
@@ -130,7 +143,37 @@ class MainFragment : Fragment() {
             }
         })
 
+        binding.textviewGetLocation.setOnClickListener {
+            locationPermissionsResultLauncher.launch(locationPermissions)
+        }
 
+        binding.buttonCheckBlue.setOnClickListener {
+            prepareBluetooth()
+        }
+
+        isLocationPermissionGranted.observe(viewLifecycleOwner, Observer { granted ->
+            if (granted != null && granted == true) {
+                binding.textviewGetLocation.visibility = View.GONE
+                binding.textviewLatitude.visibility = View.VISIBLE
+                binding.textviewLongitude.visibility = View.VISIBLE
+            } else {
+                binding.textviewGetLocation.visibility = View.VISIBLE
+                binding.textviewLatitude.visibility = View.GONE
+                binding.textviewLongitude.visibility = View.GONE
+            }
+        })
+
+        isBluetoothPermissionGranted.observe(viewLifecycleOwner, Observer { granted ->
+            if (granted != null && granted == true) {
+                binding.buttonCheckBlue.visibility = View.GONE
+                binding.blueStatus.visibility = View.VISIBLE
+                binding.blueDevice.visibility = View.VISIBLE
+            } else {
+                binding.buttonCheckBlue.visibility = View.VISIBLE
+                binding.blueStatus.visibility = View.GONE
+                binding.blueDevice.visibility = View.GONE
+            }
+        })
 
         return binding.root
 
@@ -165,7 +208,7 @@ class MainFragment : Fragment() {
         _binding = null
     }
 
-    private fun getBatteryLevel() {
+    private fun getBatteryLevel() : String {
         val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
 
         val batteryStatus = requireContext().registerReceiver(null, intentFilter)
@@ -181,6 +224,7 @@ class MainFragment : Fragment() {
         val batteryPercentage = (level * 100) / scale
 
         Log.i("battery level", "got % $batteryPercentage")
+        return batteryPercentage.toString()
     }
 
     private fun getInternalStorageCapacity() : Pair<Long, Long> {
@@ -205,12 +249,17 @@ class MainFragment : Fragment() {
         var result = size
 
         if (result >= 1024) {
-            suffix = "KB"
+            suffix = " KB"
             result /= 1024
             if (result >= 1024) {
-                suffix = "MB"
+                suffix = " MB"
                 result /= 1024
+                if (result >= 1024) {
+                    suffix = " GB"
+                    result /= 1024
+                }
             }
+
         }
 
         val resultBuffer = java.lang.StringBuilder(result.toString())
@@ -234,17 +283,36 @@ class MainFragment : Fragment() {
         return Pair(memInfo.totalMem, memInfo.availMem)
     }
 
-    private val permissionsResultLauncher =
+    private val locationPermissionsResultLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
+            var allResults = true
             permissions.entries.forEach {
                 if (!it.value) {
                     Log.i("result launcher", "Permission ${it.key} not granted")
+                    allResults = false
                 } else {
                     Log.i("result launcher", "Permission ${it.key} granted")
                 }
             }
+            isLocationPermissionGranted.postValue(allResults)
+        }
+
+    private val bluetoothPermissionsResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            var allResults = true
+            permissions.entries.forEach {
+                if (!it.value) {
+                    Log.i("result launcher", "Permission ${it.key} not granted")
+                    allResults = false
+                } else {
+                    Log.i("result launcher", "Permission ${it.key} granted")
+                }
+            }
+            isBluetoothPermissionGranted.postValue(allResults)
         }
 
     private val locationPermissions =
@@ -291,7 +359,8 @@ class MainFragment : Fragment() {
 
     private fun isLocationEnabled() : Boolean{
         val locationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
     private fun formatCoordinate(cor: Double) : String {
@@ -361,7 +430,9 @@ class MainFragment : Fragment() {
 
     private fun prepareBluetooth() {
         if (checkPermission(bluetoothPermissions)) {
-
+            bluetoothName.value = getConnectedBluetoothDevice()
+        } else {
+            bluetoothPermissionsResultLauncher.launch(bluetoothPermissions)
         }
     }
 
@@ -388,6 +459,50 @@ class MainFragment : Fragment() {
             throw java.lang.IllegalStateException(e)
         }
     }
+
+    //@RequiresApi(Build.VERSION_CODES.P)
+    @SuppressLint("MissingPermission")
+    private fun prepareSimCard() {
+        val telephonyManager = requireContext().getSystemService<TelephonyManager>()
+        //val simSN = telephonyManager?.simSerialNumber
+        //Log.i("sim card", "sn: $simSN")
+        //val simLineNumber = telephonyManager?.line1Number
+        //Log.i("sim card", "line number: $simLineNumber")
+        var carrierName : String? = null
+        var simSignal : Int? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            carrierName = telephonyManager?.simCarrierIdName.toString()
+            carrierName?.let {
+                binding.simCarrierName.text = "$carrierName"
+                binding.simCarrierName.visibility = View.VISIBLE
+            }
+            simSignal = telephonyManager?.signalStrength?.level
+            simSignal?.let {
+                binding.simSignal.text = "Signal: ${simSignal.toString()}"
+                binding.simSignal.visibility = View.VISIBLE
+            }
+        } else {
+            binding.simCarrierName.visibility = View.GONE
+            binding.simSignal.visibility = View.GONE
+        }
+        val simState = telephonyManager?.simState
+        when (simState) {
+            TelephonyManager.SIM_STATE_ABSENT -> binding.simCardStatus.text = "no sim card"
+            TelephonyManager.SIM_STATE_NETWORK_LOCKED -> binding.simCardStatus.text = "network locked"
+            TelephonyManager.SIM_STATE_PIN_REQUIRED -> binding.simCardStatus.text = "pin required"
+            TelephonyManager.SIM_STATE_PUK_REQUIRED -> binding.simCardStatus.text = "puk required"
+            TelephonyManager.SIM_STATE_READY -> binding.simCardStatus.text = "state ready"
+            TelephonyManager.SIM_STATE_UNKNOWN -> binding.simCardStatus.text = "unknown state"
+            else -> binding.simCardStatus.text = "unknown state"
+        }
+
+    }
+
+    private fun prepareBattery() {
+        binding.batteryLevel.text = getBatteryLevel().toString()
+    }
+
+
 
 /*
     private fun getNewLocation() {
