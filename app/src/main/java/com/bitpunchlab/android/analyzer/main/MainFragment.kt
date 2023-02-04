@@ -3,15 +3,18 @@ package com.bitpunchlab.android.analyzer.main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.location.Location
 import android.location.LocationManager
-import android.location.LocationRequest
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
@@ -20,22 +23,20 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.*
-import android.telecom.TelecomManager
-import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
-import android.text.style.TtsSpan.TelephoneBuilder
 import android.util.Log
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import androidx.fragment.app.Fragment
 import androidx.core.view.MenuProvider
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.bitpunchlab.android.analyzer.BatteryInfo
 import com.bitpunchlab.android.analyzer.R
 import com.bitpunchlab.android.analyzer.databinding.FragmentMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -45,7 +46,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.lang.reflect.Method
-import java.security.Permissions
 
 
 class MainFragment : Fragment() {
@@ -59,8 +59,9 @@ class MainFragment : Fragment() {
     private var isMobileConn: Boolean = false
     private var wifiName = MutableLiveData<String?>()
     private var bluetoothName = MutableLiveData<String?>()
-    private var isLocationPermissionGranted = MutableLiveData<Boolean>(false)
-    private var isBluetoothPermissionGranted = MutableLiveData<Boolean>(false)
+    private var isLocationPermissionGranted = MutableLiveData<Boolean>()
+    private var isBluetoothPermissionGranted = MutableLiveData<Boolean>()
+    private var usbDevices = MutableLiveData<List<UsbDevice>?>()
 
 
     @SuppressLint("MissingPermission", "SetTextI18n")
@@ -83,6 +84,7 @@ class MainFragment : Fragment() {
         connectivityManager?.registerNetworkCallback(networkRequest, networkCallback)
         prepareSimCard()
         prepareBattery()
+        prepareUSB()
 
         val internalCapacity = getInternalStorageCapacity()
         val internalTotal = internalCapacity.first
@@ -97,16 +99,19 @@ class MainFragment : Fragment() {
         binding.textviewRamSize.text = formatSize(getRAMSize().second)
 
         if (checkPermission(locationPermissions)) {
-            prepareLocation()
+            getUserLocation()
             val enabled = isLocationEnabled()
             Log.i("upon start", "location is enabled? $enabled")
             // show location
             //binding.textviewLatitude.text = "latitude: ${userLocation?.latitude}"
             //binding.textviewLongitude.text = "longitude: ${userLocation?.longitude}"
-
-            //binding.textviewGetLocation.visibility = View.GONE
+            binding.textviewLatitude.visibility = View.VISIBLE
+            binding.textviewLongitude.visibility = View.VISIBLE
+            binding.textviewGetLocation.visibility = View.GONE
         } else {
-
+            binding.textviewGetLocation.visibility = View.VISIBLE
+            binding.textviewLatitude.visibility = View.GONE
+            binding.textviewLongitude.visibility = View.GONE
             //binding.textviewGetLocation.visibility = View.VISIBLE
         }
 
@@ -120,13 +125,13 @@ class MainFragment : Fragment() {
 
         // prepare bluetooth display
         if (checkPermission(bluetoothPermissions)) {
-            //binding.blueStatus.visibility = View.VISIBLE
-            //binding.blueDevice.visibility = View.VISIBLE
-            //binding.buttonCheckBlue.visibility = View.GONE
+            binding.blueStatus.visibility = View.VISIBLE
+            binding.blueDevice.visibility = View.VISIBLE
+            binding.buttonCheckBlue.visibility = View.GONE
         } else {
-            //binding.buttonCheckBlue.visibility = View.VISIBLE
-            //binding.blueStatus.visibility = View.GONE
-            //binding.blueDevice.visibility = View.GONE
+            binding.buttonCheckBlue.visibility = View.VISIBLE
+            binding.blueStatus.visibility = View.GONE
+            binding.blueDevice.visibility = View.GONE
         }
 
         userLocation.observe(viewLifecycleOwner, Observer { location ->
@@ -143,6 +148,15 @@ class MainFragment : Fragment() {
             }
         })
 
+        usbDevices.observe(viewLifecycleOwner, Observer { devices ->
+            if (!devices.isNullOrEmpty()) {
+                binding.firstUsb.text = "Connected: $devices[0]"
+                binding.noUsb.text = "No of devices: ${devices.size}"
+            }
+        })
+
+        // if the get location button is displayed, that means the permissions are not granted
+        // so, upon click, we request it
         binding.textviewGetLocation.setOnClickListener {
             locationPermissionsResultLauncher.launch(locationPermissions)
         }
@@ -151,24 +165,32 @@ class MainFragment : Fragment() {
             prepareBluetooth()
         }
 
+        // this part is for the occasion that the user clicked get location
+        // and granted the permissions
+        // the app can react immediately to detect the location and show it
         isLocationPermissionGranted.observe(viewLifecycleOwner, Observer { granted ->
             if (granted != null && granted == true) {
                 binding.textviewGetLocation.visibility = View.GONE
                 binding.textviewLatitude.visibility = View.VISIBLE
                 binding.textviewLongitude.visibility = View.VISIBLE
-            } else {
+                getUserLocation()
+            } else if (granted == false) {
                 binding.textviewGetLocation.visibility = View.VISIBLE
                 binding.textviewLatitude.visibility = View.GONE
                 binding.textviewLongitude.visibility = View.GONE
             }
         })
 
+        // this part is for the occasion that the user clicked check bluetooth
+        // and granted the permissions
+        // the app can react immediately to detect the bluetooth and show it
         isBluetoothPermissionGranted.observe(viewLifecycleOwner, Observer { granted ->
             if (granted != null && granted == true) {
                 binding.buttonCheckBlue.visibility = View.GONE
                 binding.blueStatus.visibility = View.VISIBLE
                 binding.blueDevice.visibility = View.VISIBLE
-            } else {
+                prepareBluetooth()
+            } else if (granted == false) {
                 binding.buttonCheckBlue.visibility = View.VISIBLE
                 binding.blueStatus.visibility = View.GONE
                 binding.blueDevice.visibility = View.GONE
@@ -208,23 +230,43 @@ class MainFragment : Fragment() {
         _binding = null
     }
 
-    private fun getBatteryLevel() : String {
+    private fun getBatteryStatus() : HashMap<BatteryInfo, Int> {
         val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
 
         val batteryStatus = requireContext().registerReceiver(null, intentFilter)
 
         var level = -1
         var scale = -1
+        var voltage = -1
+        var temp = -1
+        var health = -1
+        //var isCharging = -1
 
         if (batteryStatus != null) {
             level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
+            temp = batteryStatus.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1)
+            health = batteryStatus.getIntExtra(BatteryManager.EXTRA_HEALTH, -1)
+            //isCharging = batteryStatus.getIntExtra(BatteryManager.ACTION_CHARGING, -1)
         }
 
         val batteryPercentage = (level * 100) / scale
 
-        Log.i("battery level", "got % $batteryPercentage")
-        return batteryPercentage.toString()
+        //Log.i("battery level", "got % $batteryPercentage")
+        val hashmap = HashMap<BatteryInfo, Int>()
+        hashmap[BatteryInfo.LEVEL] = batteryPercentage
+        hashmap[BatteryInfo.VOLTAGE] = voltage
+        hashmap[BatteryInfo.TEMPERATURE] = temp
+        hashmap[BatteryInfo.HEALTH] = health
+
+        val isCharging = requireContext().getSystemService<BatteryManager>()?.isCharging
+        if (isCharging == true) {
+
+        }
+        hashmap[BatteryInfo.IS_CHARGING] =
+
+        return hashmap
     }
 
     private fun getInternalStorageCapacity() : Pair<Long, Long> {
@@ -315,6 +357,24 @@ class MainFragment : Fragment() {
             isBluetoothPermissionGranted.postValue(allResults)
         }
 
+    private val usbPermissionsResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            var allResults = true
+            permissions.entries.forEach {
+                if (!it.value) {
+                    //Log.i("result launcher", "Permission ${it.key} not granted")
+                    //allResults = false
+                    Log.i("usb permission", "not granted")
+                } else {
+                    //Log.i("result launcher", "Permission ${it.key} granted")
+                    Log.i("usb permission", "granted")
+                }
+            }
+            //isBluetoothPermissionGranted.postValue(allResults)
+        }
+
     private val locationPermissions =
         arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -350,7 +410,7 @@ class MainFragment : Fragment() {
 
     // if we got the permissions, we execute find location,
     // and show the lat lng
-    private fun prepareLocation() {
+    private fun getUserLocation() {
         CoroutineScope(Dispatchers.IO).launch {
             userLocation.postValue(findCurrentLocation())
             //Log.i("prepare location")
@@ -378,10 +438,10 @@ class MainFragment : Fragment() {
             val activeNetworkCap = connectivityManager!!.getNetworkCapabilities(network)
 
             // here, check if it is connected
-            when {
-                activeNetworkCap?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true -> return "Wifi"
-                activeNetworkCap?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true -> return "Mobile"
-                else -> return "None"
+            return when {
+                activeNetworkCap?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true -> "Wifi"
+                activeNetworkCap?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true -> "Mobile"
+                else -> "None"
             }
         }
         return "None"
@@ -441,7 +501,6 @@ class MainFragment : Fragment() {
         val bluetoothManager = requireContext().getSystemService<BluetoothManager>()
         val pairedDevices = bluetoothManager?.adapter?.bondedDevices
         Log.i("get paired devices", pairedDevices?.size.toString())
-        //val connectedDevices = bluetoothManager?.getConnectedDevices()
         pairedDevices?.map { device ->
             if (isConnected(device)) {
                 return device.name
@@ -464,12 +523,8 @@ class MainFragment : Fragment() {
     @SuppressLint("MissingPermission")
     private fun prepareSimCard() {
         val telephonyManager = requireContext().getSystemService<TelephonyManager>()
-        //val simSN = telephonyManager?.simSerialNumber
-        //Log.i("sim card", "sn: $simSN")
-        //val simLineNumber = telephonyManager?.line1Number
-        //Log.i("sim card", "line number: $simLineNumber")
-        var carrierName : String? = null
-        var simSignal : Int? = null
+        var carrierName : String?
+        var simSignal : Int?
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             carrierName = telephonyManager?.simCarrierIdName.toString()
             carrierName?.let {
@@ -478,7 +533,7 @@ class MainFragment : Fragment() {
             }
             simSignal = telephonyManager?.signalStrength?.level
             simSignal?.let {
-                binding.simSignal.text = "Signal: ${simSignal.toString()}"
+                binding.simSignal.text = "Strength: ${simSignal.toString()}"
                 binding.simSignal.visibility = View.VISIBLE
             }
         } else {
@@ -486,24 +541,131 @@ class MainFragment : Fragment() {
             binding.simSignal.visibility = View.GONE
         }
         val simState = telephonyManager?.simState
-        when (simState) {
-            TelephonyManager.SIM_STATE_ABSENT -> binding.simCardStatus.text = "no sim card"
-            TelephonyManager.SIM_STATE_NETWORK_LOCKED -> binding.simCardStatus.text = "network locked"
-            TelephonyManager.SIM_STATE_PIN_REQUIRED -> binding.simCardStatus.text = "pin required"
-            TelephonyManager.SIM_STATE_PUK_REQUIRED -> binding.simCardStatus.text = "puk required"
-            TelephonyManager.SIM_STATE_READY -> binding.simCardStatus.text = "state ready"
-            TelephonyManager.SIM_STATE_UNKNOWN -> binding.simCardStatus.text = "unknown state"
-            else -> binding.simCardStatus.text = "unknown state"
+        simState.let {
+            binding.simCardStatus.text = parseSimState(it!!)
         }
 
     }
 
-    private fun prepareBattery() {
-        binding.batteryLevel.text = getBatteryLevel().toString()
+    private fun parseSimState(state: Int) : String {
+        return when (state) {
+            TelephonyManager.SIM_STATE_ABSENT -> "no sim card"
+            TelephonyManager.SIM_STATE_NETWORK_LOCKED -> "network locked"
+            TelephonyManager.SIM_STATE_PIN_REQUIRED -> "pin required"
+            TelephonyManager.SIM_STATE_PUK_REQUIRED -> "puk required"
+            TelephonyManager.SIM_STATE_READY -> "state ready"
+            -1 -> "can't read"
+            else -> "unknown state"
+        }
     }
 
+    @SuppressLint("SetTextI18n")
+    private fun prepareBattery() {
+        val status = getBatteryStatus()
+        binding.batteryLevel.text = status[BatteryInfo.LEVEL].toString()
+        binding.batteryVoltage.text = "volt: ${status[BatteryInfo.VOLTAGE].toString()}"
+        binding.batteryTemp.text = "temp: ${status[BatteryInfo.TEMPERATURE].toString()}"
+        status[BatteryInfo.HEALTH]?.let {
+            binding.batteryHealth.text = "health: ${parseBatteryHealth(it!!)}"
+        }
+        val isCharging = requireContext().getSystemService<BatteryManager>()?.isCharging
+        if (isCharging != null && isCharging == true) {
+            binding.batteryCharging.text = "Charging"
+        } else {
+            binding.batteryCharging.text = "Not Charging"
+        }
+    }
+
+    private fun parseBatteryHealth(health: Int) : String {
+        return when (health) {
+            BatteryManager.BATTERY_HEALTH_GOOD -> "good"
+            BatteryManager.BATTERY_HEALTH_COLD -> "cold"
+            BatteryManager.BATTERY_HEALTH_DEAD -> "died"
+            BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> "over voltage"
+            BatteryManager.BATTERY_HEALTH_OVERHEAT -> "over heat"
+            BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE -> "failure"
+            -1 -> return "can't read"
+            else -> "unknown"
+        }
+    }
+
+    private val usbDeviceReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val device: UsbDevice? = intent?.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+
+        }
+
+    }
+
+    private fun getConnectedUSB() : List<UsbDevice>? {
+        val usbManager = requireContext().getSystemService<UsbManager>()
+        usbManager?.let {
+            Log.i("get connected usb", "got usb manager")
+        }
+        val devicesList = usbManager?.deviceList?.map { usbMap ->
+            usbMap.value
+        }
+        Log.i("get connected usb", "connected USBs: ${devicesList?.size}")
 
 
+        return devicesList
+    }
+
+    private fun prepareUSB() {
+
+        usbDevices.value = getConnectedUSB()
+        if (usbDevices.value != null && usbDevices.value!!.isNotEmpty()) {
+            binding.firstUsb.visibility = View.VISIBLE
+            binding.noUsb.visibility = View.VISIBLE
+            binding.firstUsb.text = "Connected to USB"
+            binding.noUsb.text = usbDevices.value!!.size.toString()
+        } else {
+            binding.firstUsb.visibility = View.INVISIBLE
+            binding.noUsb.visibility = View.INVISIBLE
+        }
+
+        // since, when we listen to the usb state, state connected detected
+        // it might not be pc, it can be usb connected
+        // so if the usbManager.getDeviceList shows 0,
+        // we can say, it is probably connected to a pc
+        // we are the usb client and pc is the host
+        // when we are the host, there is no usb detected
+        val connected = isConnectedToPC(requireContext())
+
+        if (connected == true &&
+            (usbDevices.value == null || usbDevices.value!!.isEmpty())) {
+
+            binding.usbStatus.text = "Connected to PC\n or accessory"
+            //binding.firstUsb.visibility = View.GONE
+            //binding.noUsb.visibility = View.GONE
+        } else if (connected == false &&
+            (usbDevices.value == null || usbDevices.value!!.isEmpty())) {
+            binding.usbStatus.text = "Not Connected"
+        } // there is a case when connected == false but there are usb devices in device list
+        // in this case, we say nothing
+
+
+    }
+
+    private val connectedToDeviceReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.i("connected to device",
+                "trying to get device name ${intent?.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)}")
+        }
+
+    }
+
+    private fun isConnectedToPC(context: Context) : Boolean? {
+        val intent = context.registerReceiver(connectedToDeviceReceiver,
+            IntentFilter("android.hardware.usb.action.USB_STATE"));
+        return intent?.getExtras()?.getBoolean("connected");
+    }
+
+    val usbPermission = "com.bitpunchlab.android.analyzer.action.USB_Permission"
+
+
+
+}
 /*
     private fun getNewLocation() {
         val locationRequest = com.google.android.gms.location.LocationRequest()
@@ -530,7 +692,7 @@ class MainFragment : Fragment() {
     }
 
  */
-}
+
 
 /*
     @SuppressLint("NotifyDataSetChanged")

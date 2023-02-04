@@ -75,37 +75,74 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginTop="40dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/guide_first_row"
+                app:layout_constraintEnd_toEndOf="@id/guide_first_half_column"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/search"
                 tools:srcCompat="@drawable/search" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:orientation="horizontal"
+                android:layout_marginLeft="20dp"
                 app:layout_constraintStart_toEndOf="@id/art_home"
                 app:layout_constraintBottom_toTopOf="@id/guide_first_row">
 
-                <ImageView
-                    android:id="@+id/art_battery"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    app:srcCompat="@drawable/battery"
-                    tools:srcCompat="@drawable/battery"
-                    />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/battery_level"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textColor="@color/clickable_text"
-                    tools:text="16"/>
+                        <ImageView
+                            android:id="@+id/art_battery"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            app:srcCompat="@drawable/battery"
+                            tools:srcCompat="@drawable/battery"
+                            />
+
+                        <TextView
+                            android:id="@+id/battery_level"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textColor="@color/clickable_text"
+                            tools:text="16"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/battery_voltage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/clickable_text"/>
+
+                        <TextView
+                            android:id="@+id/battery_temp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/clickable_text"/>
+
+                        <TextView
+                            android:id="@+id/battery_health"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/clickable_text"/>
+
+                        <TextView
+                            android:id="@+id/battery_charging"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/clickable_text"/>
+                    </LinearLayout>
+
 
             </LinearLayout>
 
@@ -222,8 +259,10 @@
                     android:id="@+id/textview_get_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/clickable_text"
                     android:clickable="true"
+                    android:visibility="gone"
                     android:text="@string/get_location"/>
 
                 <TextView
@@ -321,6 +360,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/sim_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -372,6 +412,48 @@
                     android:visibility="gone"/>
 
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/usb_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@id/guide_second_third_column"
+                app:layout_constraintStart_toStartOf="@id/guide_first_third_column"
+                app:layout_constraintTop_toBottomOf="@id/guide_third_row"
+                app:layout_constraintBottom_toTopOf="@+id/guide_fourth_row" >
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:srcCompat="@drawable/usb"
+                    tools:srcCompat="@drawable/usb" />
+
+                <TextView
+                    android:id="@+id/usb_status"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"/>
+
+                <TextView
+                    android:id="@+id/first_usb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/no_usb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:visibility="gone"
+                    />
+
+            </LinearLayout>
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
