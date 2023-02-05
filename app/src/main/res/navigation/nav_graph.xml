@@ -17,6 +17,9 @@
         <action
             android:id="@+id/toDeviceListAction"
             app:destination="@id/devicesFragment" />
+        <action
+            android:id="@+id/toCompassAction"
+            app:destination="@id/compassFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
@@ -38,4 +41,9 @@
         android:name="com.bitpunchlab.android.analyzer.devices.DevicesFragment"
         android:label="Nearby Devices"
         tools:layout="@layout/fragment_devices" />
+    <fragment
+        android:id="@+id/compassFragment"
+        android:name="com.bitpunchlab.android.analyzer.compass.CompassFragment"
+        android:label="fragment_compass"
+        tools:layout="@layout/fragment_compass" />
 </navigation>

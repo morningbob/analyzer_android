@@ -453,6 +453,42 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/compass_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:gravity="center_horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/guide_second_third_column"
+                app:layout_constraintTop_toBottomOf="@id/guide_third_row"
+                app:layout_constraintBottom_toTopOf="@+id/guide_fourth_row">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:srcCompat="@drawable/compass"
+                    tools:srcCompat="@drawable/compass" />
+
+                <TextView
+                    android:id="@+id/compass_start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:clickable="true"
+                    android:text="@string/start_compass"
+                    android:textColor="@color/clickable_text"/>
+
+                <TextView
+                    android:id="@+id/last_known_direction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:text="@string/start_compass"
+                    android:textColor="@color/clickable_text"/>
+
+            </LinearLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

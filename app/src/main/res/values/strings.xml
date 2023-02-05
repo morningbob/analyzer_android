@@ -15,4 +15,5 @@
     <string name="devices">Devices</string>
     <string name="get_location">Get Location</string>
     <string name="check">Check</string>
+    <string name="start_compass">Start Compass</string>
 </resources>

@@ -165,6 +165,10 @@ class MainFragment : Fragment() {
             prepareBluetooth()
         }
 
+        binding.compassLayout.setOnClickListener {
+            findNavController().navigate(R.id.toCompassAction)
+        }
+
         // this part is for the occasion that the user clicked get location
         // and granted the permissions
         // the app can react immediately to detect the location and show it
