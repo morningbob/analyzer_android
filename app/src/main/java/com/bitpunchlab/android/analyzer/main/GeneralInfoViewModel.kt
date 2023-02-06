@@ -2,11 +2,13 @@ package com.bitpunchlab.android.analyzer.main
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 class GeneralInfoViewModel(application: Application) : AndroidViewModel(application) {
 
+    var lastKnownDirection = MutableLiveData<String?>()
 }
 
 class GeneralInfoViewModelFactory(private val application: Application)

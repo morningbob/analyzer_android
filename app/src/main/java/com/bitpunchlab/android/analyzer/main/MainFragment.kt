@@ -35,6 +35,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bitpunchlab.android.analyzer.BatteryInfo
 import com.bitpunchlab.android.analyzer.R
@@ -55,13 +56,13 @@ class MainFragment : Fragment() {
     private lateinit var fusedLocationClient : FusedLocationProviderClient
     private var userLocation = MutableLiveData<Location?>()
     private var connectivityManager: ConnectivityManager? = null
-    private var isWifiConn: Boolean = false
-    private var isMobileConn: Boolean = false
     private var wifiName = MutableLiveData<String?>()
     private var bluetoothName = MutableLiveData<String?>()
     private var isLocationPermissionGranted = MutableLiveData<Boolean>()
     private var isBluetoothPermissionGranted = MutableLiveData<Boolean>()
+    private var isWifiPermissionGranted = MutableLiveData<Boolean>()
     private var usbDevices = MutableLiveData<List<UsbDevice>?>()
+    private lateinit var generalInfoViewModel: GeneralInfoViewModel
 
 
     @SuppressLint("MissingPermission", "SetTextI18n")
@@ -71,6 +72,9 @@ class MainFragment : Fragment() {
     ): View? {
 
         _binding = FragmentMainBinding.inflate(inflater, container, false)
+        generalInfoViewModel = ViewModelProvider(requireActivity(),
+            GeneralInfoViewModelFactory(requireActivity().application))
+            .get(GeneralInfoViewModel::class.java)
 
         setupMenu()
 
@@ -78,7 +82,7 @@ class MainFragment : Fragment() {
         connectivityManager = requireContext().getSystemService<ConnectivityManager>()
 
         binding.lifecycleOwner = viewLifecycleOwner
-        //binding.userLocation = userLocation
+
         //setupNetworkCallback()
         // to get the name of the wifi connection, if there is one
         connectivityManager?.registerNetworkCallback(networkRequest, networkCallback)
@@ -154,6 +158,16 @@ class MainFragment : Fragment() {
                 binding.noUsb.text = "No of devices: ${devices.size}"
             }
         })
+
+        // make sure the wifi permissions are granted
+        binding.signalLayout.setOnClickListener {
+            if (checkPermission(wifiPermissions)) {
+                isWifiPermissionGranted.value = true
+                findNavController().navigate(R.id.toWifiAction)
+            } else {
+                wifiPermissionsResultLauncher.launch(wifiPermissions)
+            }
+        }
 
         // if the get location button is displayed, that means the permissions are not granted
         // so, upon click, we request it
@@ -329,6 +343,22 @@ class MainFragment : Fragment() {
         return Pair(memInfo.totalMem, memInfo.availMem)
     }
 
+    private val wifiPermissionsResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            var allResults = true
+            permissions.entries.forEach {
+                if (!it.value) {
+                    Log.i("result launcher", "Permission ${it.key} not granted")
+                    allResults = false
+                } else {
+                    Log.i("result launcher", "Permission ${it.key} granted")
+                }
+            }
+            isWifiPermissionGranted.postValue(allResults)
+        }
+
     private val locationPermissionsResultLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -452,12 +482,6 @@ class MainFragment : Fragment() {
 
     }
 
-    // use this method to get wifi name before api Q, 29
-    private fun getNameWifi() {
-        val wifiManager = requireContext().getSystemService<WifiManager>()
-        wifiManager
-    }
-
     private val networkRequest = NetworkRequest.Builder()
         .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
         .build()
@@ -478,6 +502,12 @@ class MainFragment : Fragment() {
             wifiName.postValue(wifiIno.ssid)
         }
     }
+
+    private var wifiPermissions =
+        arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        )
 
     private val bluetoothPermissions =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

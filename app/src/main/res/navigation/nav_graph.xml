@@ -20,6 +20,12 @@
         <action
             android:id="@+id/toCompassAction"
             app:destination="@id/compassFragment" />
+        <action
+            android:id="@+id/action_MainFragment_to_devicesFragment"
+            app:destination="@id/devicesFragment" />
+        <action
+            android:id="@+id/toWifiAction"
+            app:destination="@id/wifiDevicesFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"

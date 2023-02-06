@@ -8,6 +8,9 @@
         <variable
             name="userLocation"
             type="android.location.Location" />
+        <variable
+            name="generalInfoViewModel"
+            type="com.bitpunchlab.android.analyzer.main.GeneralInfoViewModel" />
     </data>
 
     <ScrollView
@@ -288,6 +291,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
+                android:clickable="true"
                 app:layout_constraintBottom_toTopOf="@id/guide_third_row"
                 app:layout_constraintEnd_toStartOf="@+id/guide_second_third_column"
                 app:layout_constraintStart_toEndOf="@id/guide_first_third_column"
@@ -485,7 +489,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="0dp"
-                    android:text="@string/start_compass"
+                    android:text="@{generalInfoViewModel.lastKnownDirection != null ? generalInfoViewModel.lastKnownDirection : `---`}"
                     android:textColor="@color/clickable_text"/>
 
             </LinearLayout>
