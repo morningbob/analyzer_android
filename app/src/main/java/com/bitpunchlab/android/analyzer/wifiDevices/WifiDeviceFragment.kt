@@ -1,60 +1,107 @@
 package com.bitpunchlab.android.analyzer.wifiDevices
 
+import android.net.wifi.ScanResult
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import com.bitpunchlab.android.analyzer.R
+import com.bitpunchlab.android.analyzer.databinding.FragmentWifiDeviceBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [WifiDeviceFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class WifiDeviceFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private var _binding : FragmentWifiDeviceBinding? = null
+    private val binding get() = _binding!!
+    private var device : ScanResult? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_wifi_device, container, false)
+        _binding = FragmentWifiDeviceBinding.inflate(inflater, container, false)
+        device = requireArguments().getParcelable<ScanResult>("device")
+        //Log.i("wifi device fragment", "name ${device?.BSSID}")
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.device = device
+
+        displaySecurityModes()
+        displayStandard()
+        device
+        // freqCenter = freqStart + 5 * channelNumber
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment WifiDeviceFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            WifiDeviceFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun displaySecurityModes() {
+        //if (device!!.capabilities != null && device!!.capabilities != "") {
+        val modes = identifySecurityMode(device!!.capabilities)
+        if (!modes.isNullOrEmpty()) {
+            binding.textviewCap.text = "Security:  ${formatModes(modes)}"
+            binding.textviewCap.visibility = View.VISIBLE
+        } else {
+            binding.textviewCap.visibility = View.INVISIBLE
+        }
+    }
+
+    // it is a string, use contains
+    private fun identifySecurityMode(cap: String) : List<String> {
+        //val securityModes = { WEP, WPA, WPA2, WPA_EAP, IEEE8021X, ESS }
+        var modes = mutableListOf<String>("WEP", "WPA", "WPA2", "WPA_EAP", "IEEE8021X", "ESS")
+        var result = mutableListOf<String>()
+        modes.map { mode ->
+            if (cap.contains(mode)) {
+                result.add(mode)
             }
+        }
+
+        return result
+
+    }
+
+    private fun formatModes(cap: List<String>) : String {
+        var result = ""
+        cap.map { mode ->
+            result += "$mode, "
+        }
+        return if (result != "") {
+            result.substring(0, result.length-2)
+        } else
+            result
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun displayStandard() {
+        val standard = identifyStandard(device!!.wifiStandard)
+        if (standard != "") {
+            binding.textviewStandard.visibility = View.VISIBLE
+            binding.textviewStandard.text = "Standard:  $standard"
+        } else {
+            binding.textviewStandard.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun identifyStandard(standard: Int) : String {
+        return when (standard) {
+            4 -> "802.11n   2.4/5 GHz"
+            5 -> "802.11ac   5 GHz"
+            6 -> "802.11ax   2.4/5/6 GHz"
+            else -> ""
+        }
     }
 }

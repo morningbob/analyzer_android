@@ -19,15 +19,89 @@
             android:layout_height="match_parent"
             tools:context=".wifiDevices.WifiDeviceFragment">
 
+            <ImageView
+                android:id="@+id/art_device"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginTop="40dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/wifidevice"
+                tools:srcCompat="@drawable/wifidevice" />
+
             <TextView
                 android:id="@+id/textview_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Wifi Device"
-                android:layout_marginTop="50dp"
+                android:text="@string/wifi_device"
+                android:layout_marginTop="30dp"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/art_device" />
+
+
+            <TextView
+                android:id="@+id/textview_ssid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{device.SSID}"
+                android:layout_marginTop="30dp"
+                android:textSize="20sp"
+                android:textColor="@color/clickable_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textview_title" />
+
+            <TextView
+                android:id="@+id/textview_bssid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{`BSSID:  ` + device.BSSID}"
+                android:layout_marginTop="30dp"
+                android:textSize="20sp"
+                android:textColor="@color/clickable_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textview_ssid" />
+
+            <TextView
+                android:id="@+id/textview_frequency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{`Frequency:  ` + device.frequency + ``}"
+                android:layout_marginTop="30dp"
+                android:textSize="20sp"
+                android:textColor="@color/clickable_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textview_bssid" />
+
+            <TextView
+                android:id="@+id/textview_cap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:textSize="20sp"
+                android:textColor="@color/clickable_text"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textview_frequency" />
+
+            <TextView
+                android:id="@+id/textview_standard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:textSize="20sp"
+                android:textColor="@color/clickable_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textview_cap" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

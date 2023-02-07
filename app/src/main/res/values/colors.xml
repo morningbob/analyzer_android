@@ -9,6 +9,6 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="clickable_text">#1a73f0</color>
-    <color name="wifi_device_item_background">#c0f0c8</color>
+    <color name="wifi_device_item_background">#c0f0cd</color>
     <color name="bluetooth_device_item_background">#9bcbf2</color>
 </resources>

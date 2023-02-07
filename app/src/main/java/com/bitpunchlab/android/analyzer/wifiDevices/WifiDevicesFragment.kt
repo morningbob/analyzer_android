@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.bitpunchlab.android.analyzer.R
 import com.bitpunchlab.android.analyzer.databinding.FragmentWifiDevicesBinding
 import com.bitpunchlab.android.analyzer.devices.*
@@ -44,7 +45,10 @@ class WifiDevicesFragment : Fragment() {
         wifiDeviceAdapter = WifiDeviceAdapter(WifiOnClickListener { device ->
             // show details
             wifiDeviceViewModel.onDeviceClicked(device)
+            Log.i("on click listener", "clicked")
         })
+
+        binding.wifiRecycler.adapter = wifiDeviceAdapter
 
         wifiDeviceViewModel.isScanningWifi.observe(viewLifecycleOwner, Observer { scanning ->
             if (scanning) {
@@ -64,6 +68,11 @@ class WifiDevicesFragment : Fragment() {
         wifiDeviceViewModel.chosenDevice.observe(viewLifecycleOwner, Observer { device ->
             // navigate to device for further checks
             device?.let {
+                //val action = WifiDevicesFragment
+                val bundle = Bundle()
+                bundle.putParcelable("device", device)
+                Log.i("chosen device", "about to navigate")
+                findNavController().navigate(R.id.toDeviceAction, bundle)
                 wifiDeviceViewModel.finishDevice(device)
             }
         })

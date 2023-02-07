@@ -41,7 +41,11 @@
         android:id="@+id/wifiDevicesFragment"
         android:name="com.bitpunchlab.android.analyzer.wifiDevices.WifiDevicesFragment"
         android:label="Wifi"
-        tools:layout="@layout/fragment_wifi_devices" />
+        tools:layout="@layout/fragment_wifi_devices" >
+        <action
+            android:id="@+id/toDeviceAction"
+            app:destination="@id/wifiDeviceFragment" />
+    </fragment>
     <fragment
         android:id="@+id/devicesFragment"
         android:name="com.bitpunchlab.android.analyzer.devices.DevicesFragment"
@@ -52,4 +56,12 @@
         android:name="com.bitpunchlab.android.analyzer.compass.CompassFragment"
         android:label="fragment_compass"
         tools:layout="@layout/fragment_compass" />
+    <fragment
+        android:id="@+id/wifiDeviceFragment"
+        android:name="com.bitpunchlab.android.analyzer.wifiDevices.WifiDeviceFragment"
+        android:label="WifiDeviceFragment" >
+        <argument
+            android:name="device"
+            app:argType="android.net.wifi.ScanResult" />
+    </fragment>
 </navigation>

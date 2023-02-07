@@ -45,6 +45,7 @@ class WifiDeviceViewModel(application: Application) : AndroidViewModel(applicati
         wifiManager = getApplication<Application>().getSystemService<WifiManager>() as WifiManager
         registerWifiReceiver()
         Log.i("starting wifi vm", "init ran")
+
     }
 
     private fun registerWifiReceiver() {

@@ -19,7 +19,8 @@ class WifiDeviceAdapter(val clickListener: WifiOnClickListener) : GenericBaseRec
             onClickListener: GenericClickListener<ScanResult>?
         ) {
             (binding as ItemWifiDeviceBinding).device = item
-            binding
+            binding.clickListener = clickListener
+            binding.executePendingBindings()
         }
     }
 ) {

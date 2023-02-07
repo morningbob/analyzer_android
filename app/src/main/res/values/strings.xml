@@ -19,4 +19,5 @@
     <string name="wifi_devices">Wifi Devices</string>
     <string name="not_scanning">Not scanning</string>
     <string name="scanning">Scanning</string>
+    <string name="wifi_device">Wifi Device</string>
 </resources>
