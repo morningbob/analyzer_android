@@ -20,26 +20,34 @@
         app:cardCornerRadius="10dp"
         tools:context=".devices.DeviceFragment">
 
-    <LinearLayout 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:onClick="@{() -> clickListener.onClick(device)}">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:onClick="@{() -> clickListener.onClick(device)}">
 
-        <TextView
-            android:id="@+id/scan_id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@={device.SSID}"/>
-        
-        <TextView
-            android:id="@+id/scan_frequency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@={device.frequency + ``}"/>
-    
-    </LinearLayout>
+            <TextView
+                android:id="@+id/scan_id"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="@={device.SSID}"/>
+
+            <TextView
+                android:id="@+id/scan_strength"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                app:processSignal="@{device.level}"
+                />
+
+            <ProgressBar
+                android:id="@+id/signal_level"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                style="?android:attr/progressBarStyleHorizontal"/>
+        </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 </layout>

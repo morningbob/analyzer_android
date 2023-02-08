@@ -695,10 +695,6 @@ class MainFragment : Fragment() {
         return intent?.getExtras()?.getBoolean("connected");
     }
 
-    val usbPermission = "com.bitpunchlab.android.analyzer.action.USB_Permission"
-
-
-
 }
 /*
     private fun getNewLocation() {

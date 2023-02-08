@@ -69,16 +69,28 @@
                 app:layout_constraintTop_toBottomOf="@id/textview_ssid" />
 
             <TextView
-                android:id="@+id/textview_frequency"
+                android:id="@+id/textview_signal_strength"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{`Frequency:  ` + device.frequency + ``}"
+                app:processSignal="@{device.level}"
                 android:layout_marginTop="30dp"
                 android:textSize="20sp"
                 android:textColor="@color/clickable_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textview_bssid" />
+
+            <TextView
+                android:id="@+id/textview_frequency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="30dp"
+                android:textSize="20sp"
+                android:textColor="@color/clickable_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textview_signal_strength" />
 
             <TextView
                 android:id="@+id/textview_cap"
@@ -98,6 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:textSize="20sp"
+                android:visibility="gone"
                 android:textColor="@color/clickable_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

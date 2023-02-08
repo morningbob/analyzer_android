@@ -62,6 +62,11 @@ class WifiDeviceViewModel(application: Application) : AndroidViewModel(applicati
         isScanningWifi.value = false
     }
 
+    private fun getSignalStrength() {
+        //val level = wifiManager?.calculateSignalLevel()
+        wifiManager
+    }
+
     fun onDeviceClicked(device: ScanResult) {
         _chosenDevice.value = device
     }

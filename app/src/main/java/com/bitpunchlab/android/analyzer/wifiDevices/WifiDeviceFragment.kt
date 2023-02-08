@@ -37,7 +37,8 @@ class WifiDeviceFragment : Fragment() {
 
         displaySecurityModes()
         displayStandard()
-        device
+        displaySignalStrength()
+        //device.level
         // freqCenter = freqStart + 5 * channelNumber
 
         return binding.root
@@ -55,7 +56,7 @@ class WifiDeviceFragment : Fragment() {
             binding.textviewCap.text = "Security:  ${formatModes(modes)}"
             binding.textviewCap.visibility = View.VISIBLE
         } else {
-            binding.textviewCap.visibility = View.INVISIBLE
+            binding.textviewCap.visibility = View.GONE
         }
     }
 
@@ -85,6 +86,7 @@ class WifiDeviceFragment : Fragment() {
             result
     }
 
+    // deal with the case below R
     @RequiresApi(Build.VERSION_CODES.R)
     private fun displayStandard() {
         val standard = identifyStandard(device!!.wifiStandard)
@@ -92,7 +94,7 @@ class WifiDeviceFragment : Fragment() {
             binding.textviewStandard.visibility = View.VISIBLE
             binding.textviewStandard.text = "Standard:  $standard"
         } else {
-            binding.textviewStandard.visibility = View.INVISIBLE
+            binding.textviewStandard.visibility = View.GONE
         }
     }
 
@@ -102,6 +104,25 @@ class WifiDeviceFragment : Fragment() {
             5 -> "802.11ac   5 GHz"
             6 -> "802.11ax   2.4/5/6 GHz"
             else -> ""
+        }
+    }
+
+    private fun displaySignalStrength() {
+        if (device?.level != null) {
+            binding.textviewSignalStrength.visibility = View.VISIBLE
+            //binding.textviewSignalStrength.text = "Signal Strength:  ${parseSignalStrength(device!!.level)}"
+        } else {
+            binding.textviewSignalStrength.visibility = View.GONE
+        }
+    }
+
+    private fun parseSignalStrength(level: Int) : String {
+        return when (level) {
+            in -50 .. 100 -> "Excellent"
+            in -60 .. -51 -> "Good"
+            in -70 .. -61 -> "Fair"
+            in -150 .. -71 -> "Weak"
+            else -> "Unknown"
         }
     }
 }
