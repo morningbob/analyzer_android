@@ -20,6 +20,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.bitpunchlab.android.analyzer.models.BluetoothDeviceDetail
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -30,8 +31,10 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
     private var bluetoothLeScanner : BluetoothLeScanner
     private val SCAN_PERIOD: Long = 100000
     var bluetoothDevices = MutableLiveData<ArrayList<BluetoothDevice>>()
+    var bluetoothList = MutableLiveData<ArrayList<BluetoothDeviceDetail>>()
+    var rssi = MutableLiveData<ArrayList<Int>>()
 
-    var _chosenDevice = MutableLiveData<BluetoothDevice?>()
+    var _chosenDevice = MutableLiveData<BluetoothDeviceDetail?>()
     val chosenDevice get() = _chosenDevice
 
     var isScanningBluetooth = MutableLiveData<Boolean>(false)
@@ -47,12 +50,13 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
                         // Discovery has found a device. Get the BluetoothDevice
                         // object and its info from the Intent.
                         val device: BluetoothDevice? =
-                            intent!!.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        val theRssi = (intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)).toInt()
                         device?.let {
                             Log.i("bluetooth vm", "found a device ${it.address}")
                             //val deviceName = it.name
                             //val deviceHardwareAddress = device.address // MAC address
-                            addBluetoothDevice(device)
+                            addBluetoothDevice(device, theRssi)
                         }
 
                     }
@@ -83,14 +87,17 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun addBluetoothDevice(device: BluetoothDevice) {
-        var currentList = ArrayList<BluetoothDevice>()
+    fun addBluetoothDevice(device: BluetoothDevice, rssiNum: Int) {
+        var currentList = ArrayList<BluetoothDeviceDetail>()
         var isExistDevice = false
-        bluetoothDevices.value.let {
+        //var rssiList = ArrayList<Int>()
+
+        bluetoothList.value.let {
             if (!it.isNullOrEmpty()) {
                 currentList = it.toMutableList() as ArrayList
+                //rssiList = rssi.value!!.toMutableList() as ArrayList
                 currentList.map { oldDevice ->
-                    if (oldDevice.address == device.address) {
+                    if (oldDevice.device.address == device.address) {
                         // same device, don't need to add
                         isExistDevice = true
                     }
@@ -98,10 +105,16 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
             }
         }
         if (!isExistDevice) {
-            currentList.add(device)
-            bluetoothDevices.value = currentList
+            // create BluetoothDeviceDetail and put in device and rssi
+            val bluetoothDevice = BluetoothDeviceDetail(device = device, rssi = rssiNum)
+            currentList.add(bluetoothDevice)
+            //rssiList.add(rssiNum)
+            bluetoothList.value = currentList
+            //rssi.value = rssiList
         }
     }
+
+
     // for bluetooth devices (not BLE devices)
     // I'll stop scanning, after 1.30 min.
     @SuppressLint("MissingPermission")
@@ -139,7 +152,7 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
             super.onBatchScanResults(results)
             results?.let {
                 for (item in results) {
-                    addBluetoothDevice(item.device)
+                    addBluetoothDevice(item.device, 1)
                 }
             }
         }
@@ -148,7 +161,7 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
             super.onScanResult(callbackType, result)
             result?.device?.let { device ->
                 Log.i("one by one", "added a device")
-                addBluetoothDevice(device)
+                addBluetoothDevice(device, 1)
             }
         }
 
@@ -159,11 +172,11 @@ class BluetoothDeviceViewModel(application: Application) : AndroidViewModel(appl
     }
 
 
-    fun onDeviceClicked(device: BluetoothDevice) {
+    fun onDeviceClicked(device: BluetoothDeviceDetail) {
         _chosenDevice.value = device
     }
 
-    fun finishDevice(device: BluetoothDevice) {
+    fun finishDevice(device: BluetoothDeviceDetail) {
         _chosenDevice.value = null
     }
 }

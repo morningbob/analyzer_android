@@ -100,8 +100,8 @@ class DevicesFragment : Fragment() {
 
         bluetoothDeviceViewModel.bluetoothDevices.observe(viewLifecycleOwner, Observer { devices ->
             devices?.let {
-                bluetoothDeviceAdapter.submitList(devices)
-                bluetoothDeviceAdapter.notifyDataSetChanged()
+                //bluetoothDeviceAdapter.submitList(devices)
+                //bluetoothDeviceAdapter.notifyDataSetChanged()
             }
         })
 

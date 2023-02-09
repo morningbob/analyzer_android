@@ -53,8 +53,10 @@ class WifiDevicesFragment : Fragment() {
         wifiDeviceViewModel.isScanningWifi.observe(viewLifecycleOwner, Observer { scanning ->
             if (scanning) {
                 binding.textviewWifiStatus.text = getString(R.string.scanning)
+                //binding.textviewWifiStatus.isClickable = false
             } else {
                 binding.textviewWifiStatus.text = getString(R.string.not_scanning)
+                //binding.textviewWifiStatus.isClickable = true
             }
         })
 
@@ -76,6 +78,12 @@ class WifiDevicesFragment : Fragment() {
                 wifiDeviceViewModel.finishDevice(device)
             }
         })
+
+        binding.textviewWifiStatus.setOnClickListener {
+            if (wifiDeviceViewModel.isScanningWifi.value == false) {
+                startScanning()
+            }
+        }
 
         return binding.root
     }

@@ -8,19 +8,20 @@ import com.bitpunchlab.android.analyzer.base.GenericBaseRecyclerAdapter
 import com.bitpunchlab.android.analyzer.base.GenericClickListener
 import com.bitpunchlab.android.analyzer.base.GenericRecyclerBindingInterface
 import com.bitpunchlab.android.analyzer.databinding.ItemBluetoothDeviceBinding
+import com.bitpunchlab.android.analyzer.models.BluetoothDeviceDetail
 
 @SuppressLint("MissingPermission")
-class BluetoothDeviceAdapter(val clickListener: BluetoothClickListener) : GenericBaseRecyclerAdapter<BluetoothDevice>(
+class BluetoothDeviceAdapter(val clickListener: BluetoothClickListener) : GenericBaseRecyclerAdapter<BluetoothDeviceDetail>(
     clickListener = clickListener,
-    compareItems = { old, new -> old.uuids == new.uuids },
-    compareIContents = { old, new -> old.address == new.address },
-    bindingInterface = object : GenericRecyclerBindingInterface<BluetoothDevice> {
+    compareItems = { old, new -> old.device.uuids == new.device.uuids },
+    compareIContents = { old, new -> old.device.address == new.device.address },
+    bindingInterface = object : GenericRecyclerBindingInterface<BluetoothDeviceDetail> {
         override fun bindData(
-            item: BluetoothDevice,
+            item: BluetoothDeviceDetail,
             binding: ViewDataBinding,
-            onClickListener: GenericClickListener<BluetoothDevice>?
+            onClickListener: GenericClickListener<BluetoothDeviceDetail>?
         ) {
-            (binding as ItemBluetoothDeviceBinding).device = item
+            (binding as ItemBluetoothDeviceBinding).bluetooth = item
             binding.clickListener = clickListener
             binding.executePendingBindings()
         }
@@ -31,8 +32,8 @@ class BluetoothDeviceAdapter(val clickListener: BluetoothClickListener) : Generi
     }
 }
 
-class BluetoothClickListener(override val clickListener: (BluetoothDevice) -> Unit) :
-    GenericClickListener<BluetoothDevice>(clickListener) {
+class BluetoothClickListener(override val clickListener: (BluetoothDeviceDetail) -> Unit) :
+    GenericClickListener<BluetoothDeviceDetail>(clickListener) {
 
-        fun onClick(device: BluetoothDevice) = clickListener(device)
+        fun onClick(device: BluetoothDeviceDetail) = clickListener(device)
 }

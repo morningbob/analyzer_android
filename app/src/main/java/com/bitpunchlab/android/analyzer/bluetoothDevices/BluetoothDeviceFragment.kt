@@ -1,5 +1,7 @@
 package com.bitpunchlab.android.analyzer.bluetoothDevices
 
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,18 +15,23 @@ class BluetoothDeviceFragment : Fragment() {
 
     private var _binding : FragmentBluetoothDeviceBinding? = null
     private val binding get() = _binding!!
+    private var bluetoothDevice : BluetoothDevice? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
     }
 
+    @SuppressLint("MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentBluetoothDeviceBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = viewLifecycleOwner
+        bluetoothDevice = requireArguments().getParcelable<BluetoothDevice>("device")
 
+        bluetoothDevice
 
         return binding.root
     }

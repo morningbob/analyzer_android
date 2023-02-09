@@ -325,6 +325,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:clickable="true"
                 app:layout_constraintBottom_toTopOf="@+id/guide_third_row"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/guide_second_third_column"

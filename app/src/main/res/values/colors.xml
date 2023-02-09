@@ -10,5 +10,7 @@
 
     <color name="clickable_text">#1a73f0</color>
     <color name="wifi_device_item_background">#c0f0cd</color>
-    <color name="bluetooth_device_item_background">#9bcbf2</color>
+    <color name="bluetooth_device_item_background">#83c2f2</color>
+    <color name="signals_wifi">#23a145</color>
+    <color name="signals_bluetooth">#1171ba</color>
 </resources>

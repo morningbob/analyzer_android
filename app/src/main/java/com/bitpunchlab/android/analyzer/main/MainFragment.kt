@@ -139,9 +139,11 @@ class MainFragment : Fragment() {
         }
 
         userLocation.observe(viewLifecycleOwner, Observer { location ->
-            binding.userLocation = location
-            binding.textviewLatitude.text = "lat: ${formatCoordinate(location!!.latitude)}"
-            binding.textviewLongitude.text = "lng: ${formatCoordinate(location!!.longitude)}"
+            location?.let {
+                binding.userLocation = location
+                binding.textviewLatitude.text = "lat: ${formatCoordinate(location.latitude)}"
+                binding.textviewLongitude.text = "lng: ${formatCoordinate(location.longitude)}"
+            }
         })
 
         bluetoothName.observe(viewLifecycleOwner, Observer { name ->
@@ -173,6 +175,15 @@ class MainFragment : Fragment() {
         // so, upon click, we request it
         binding.textviewGetLocation.setOnClickListener {
             locationPermissionsResultLauncher.launch(locationPermissions)
+        }
+
+        binding.blueLayout.setOnClickListener {
+            if (checkPermission(bluetoothPermissions)) {
+                isBluetoothPermissionGranted.value = true
+                findNavController().navigate(R.id.toBluetoothAction)
+            } else {
+                bluetoothPermissionsResultLauncher.launch(bluetoothPermissions)
+            }
         }
 
         binding.buttonCheckBlue.setOnClickListener {

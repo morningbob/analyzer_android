@@ -15,39 +15,55 @@
     <androidx.cardview.widget.CardView
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         app:cardBackgroundColor="@color/wifi_device_item_background"
         app:cardCornerRadius="10dp"
         tools:context=".devices.DeviceFragment">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="80dp"
             android:layout_marginBottom="0dp"
             android:orientation="horizontal"
-            android:padding="10dp"
+            android:gravity="center"
+            android:padding="20dp"
+            android:weightSum="10"
             android:onClick="@{() -> clickListener.onClick(device)}">
 
             <TextView
                 android:id="@+id/scan_id"
-                android:layout_width="80dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@={device.SSID}"/>
+                android:text="@={device.SSID}"
+                android:layout_weight="4"/>
 
-            <TextView
-                android:id="@+id/scan_strength"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                app:processSignal="@{device.level}"
+
+            <com.bitpunchlab.android.analyzer.customViews.SignalBarView
+                android:id="@+id/signal_bar"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="6"
+                app:processWifiSignal="@{device.level}"
                 />
 
-            <ProgressBar
-                android:id="@+id/signal_level"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                style="?android:attr/progressBarStyleHorizontal"/>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
 </layout>
+<!--
+
+<TextView
+                android:id="@+id/scan_strength"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                app:processSignal="@{device.level}"
+                />
+    <ProgressBar
+        android:id="@+id/signal_level"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        style="?android:attr/progressBarStyleHorizontal"/>
+-->
