@@ -262,17 +262,16 @@
                     android:id="@+id/textview_get_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:textColor="@color/clickable_text"
                     android:clickable="true"
-                    android:visibility="gone"
                     android:text="@string/get_location"/>
 
                 <TextView
                     android:id="@+id/textview_latitude"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="0dp"
                     android:textColor="@color/clickable_text"
                     android:visibility="gone"/>
 
@@ -314,6 +313,12 @@
                     android:textColor="@color/clickable_text" />
 
                 <TextView
+                    android:id="@+id/wifi_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"/>
+
+                <TextView
                     android:id="@+id/network_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -326,6 +331,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:clickable="true"
+                android:gravity="center"
                 app:layout_constraintBottom_toTopOf="@+id/guide_third_row"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/guide_second_third_column"
@@ -342,25 +348,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="Active: None"
-                    android:visibility="gone"
                     android:textColor="@color/clickable_text" />
 
                 <TextView
                     android:id="@+id/blue_device"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Device: None"
-                    android:visibility="gone"
                     android:textColor="@color/clickable_text" />
 
-                <TextView
-                    android:id="@+id/button_check_blue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/clickable_text"
-                    android:clickable="true"
-                    android:text="@string/check" />
+
 
             </LinearLayout>
 
@@ -504,4 +500,12 @@
 <!--
     android:text="@{`lat: ` + userLocation.latitude}"
     android:text="@{`lng: ` + userLocation.longitude}"
+
+    <TextView
+                    android:id="@+id/button_check_blue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/clickable_text"
+                    android:clickable="true"
+                    android:text="@string/check" />
 -->

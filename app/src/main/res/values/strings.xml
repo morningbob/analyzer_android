@@ -13,10 +13,18 @@
     <string name="not_scanning">Not scanning</string>
     <string name="scanning">Scanning</string>
     <string name="wifi_device">Wifi Device</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="bluetooth_devices">Bluetooth Devices</string>
     <string name="bluetooth_device">Bluetooth Device</string>
+    <string name="location_enabled">Location Enabled</string>
+    <string name="location_disabled">Location Disabled</string>
+    <string name="only_network_enabled">Only Network enabled</string>
+    <string name="only_gps_enabled">Only GPS enabled</string>
+    <string name="requires_permission">Requires Permission</string>
+    <string name="bluetooth_enabled">Bluetooth Enabled</string>
+    <string name="bluetooth_disabled">Bluetooth Disabled</string>
+    <string name="wifi_enabled">Wifi Enabled</string>
+    <string name="wifi_disabled">Wifi Disabled</string>
 
 
 </resources>

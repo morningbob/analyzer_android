@@ -33,16 +33,3 @@ fun setWifiStrength(view: SignalBarView, level: Int) {
     view.setSignalColor(R.color.signals_wifi)
 }
 
-@BindingAdapter("processBluetoothSignal")
-fun setBluetoothStrength(view: SignalBarView, level: Int) {
-    val strength = when (level) {
-        in -50..100 -> 4
-        in -60..-51 -> 3
-        in -70..-61 -> 2
-        in -150..-71 -> 1
-        else -> 0
-
-    }
-    view.setStrength(strength)
-    view.setSignalColor(R.color.signals_bluetooth)
-}

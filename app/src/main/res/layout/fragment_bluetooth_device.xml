@@ -6,8 +6,11 @@
 
     <data>
         <variable
-            name="device"
-            type="android.bluetooth.BluetoothDevice" />
+            name="bluetooth"
+            type="com.bitpunchlab.android.analyzer.models.BluetoothDeviceDetail" />
+        <variable
+            name="view"
+            type="android.view.View" />
     </data>
 
     <ScrollView
@@ -17,7 +20,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             tools:context=".wifiDevices.WifiDeviceFragment">
 
             <ImageView
@@ -49,7 +52,7 @@
                 android:id="@+id/textview_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{device.name}"
+                android:text="@{bluetooth.device.name}"
                 android:layout_marginTop="30dp"
                 android:textSize="20sp"
                 android:textColor="@color/clickable_text"
@@ -61,10 +64,11 @@
                 android:id="@+id/textview_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{`Address:  ` + device.address}"
+                android:text="@{`Address:  ` + bluetooth.device.address}"
                 android:layout_marginTop="30dp"
                 android:textSize="20sp"
                 android:textColor="@color/clickable_text"
+                android:visibility="@{bluetooth.device.address != null ? view.VISIBLE : view.INVISIBLE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textview_name" />
@@ -73,10 +77,10 @@
                 android:id="@+id/textview_signal_strength"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:layout_marginTop="30dp"
                 android:textSize="20sp"
                 android:textColor="@color/clickable_text"
+                app:processSignal="@{bluetooth.rssi}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textview_address" />
@@ -85,11 +89,10 @@
                 android:id="@+id/textview_bond_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:layout_marginTop="30dp"
                 android:textSize="20sp"
                 android:textColor="@color/clickable_text"
-                android:text="@{device.bondState == 0 ? `Not bonded` : `Bonded`}"
+                app:processBondState="@{bluetooth.device.bondState}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textview_signal_strength" />

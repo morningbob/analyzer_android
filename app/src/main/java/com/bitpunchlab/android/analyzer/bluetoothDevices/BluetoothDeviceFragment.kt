@@ -9,13 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import com.bitpunchlab.android.analyzer.R
 import com.bitpunchlab.android.analyzer.databinding.FragmentBluetoothDeviceBinding
+import com.bitpunchlab.android.analyzer.models.BluetoothDeviceDetail
 
 
 class BluetoothDeviceFragment : Fragment() {
 
     private var _binding : FragmentBluetoothDeviceBinding? = null
     private val binding get() = _binding!!
-    private var bluetoothDevice : BluetoothDevice? = null
+    private var bluetoothDevice : BluetoothDeviceDetail? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,9 +30,10 @@ class BluetoothDeviceFragment : Fragment() {
     ): View? {
         _binding = FragmentBluetoothDeviceBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
-        bluetoothDevice = requireArguments().getParcelable<BluetoothDevice>("device")
+        bluetoothDevice = requireArguments().getParcelable<BluetoothDeviceDetail>("device")
+        binding.bluetooth = bluetoothDevice!!
 
-        bluetoothDevice
+        bluetoothDevice?.device
 
         return binding.root
     }

@@ -32,11 +32,13 @@ class SignalBarView @JvmOverloads constructor(
     @SuppressLint("ResourceType")
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        textAlign = Paint.Align.CENTER
-        textSize = 18.0f
-        typeface = Typeface.create( "", Typeface.BOLD)
+        // it just serves as the default color
         color = ContextCompat.getColor(context, R.color.signals_wifi)
-        setBackgroundColor(Color.WHITE)
+        //textAlign = Paint.Align.CENTER
+        //textSize = 18.0f
+        //typeface = Typeface.create( "", Typeface.BOLD)
+
+        //setBackgroundColor(Color.WHITE)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -44,9 +46,9 @@ class SignalBarView @JvmOverloads constructor(
         // change the width and height of the bar accordingly
         //positionX = (w * 0.93).toInt()
         positionX = w
-        positionY = (h).toInt()
+        positionY = h
         posXIncrement = (w * 0.3).toInt()
-        rect_scale = h//(h * 0.5).toInt()
+        rect_scale = h
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -54,7 +56,7 @@ class SignalBarView @JvmOverloads constructor(
 
         //drawRectangle(10, 10, canvas!!)
         drawBar((pointPosition.x).toInt(), (pointPosition.y).toInt(), strength, canvas!!)
-        canvas
+
     }
 
     fun setStrength(level: Int) {
@@ -82,8 +84,8 @@ class SignalBarView @JvmOverloads constructor(
     // ??
     private fun drawRectangle(x: Int, y: Int, canvas: Canvas) {
 
-        val rect = Rect((x-0.8*rect_scale).toInt(), (y-0.5*rect_scale).toInt(),
-            (x+0.8*rect_scale).toInt(), (y+rect_scale).toInt())
+        val rect = Rect((x-1.5*rect_scale).toInt(), (y-0.5*rect_scale).toInt(),
+            (x+1.5*rect_scale).toInt(), (y+rect_scale).toInt())
 
         canvas.drawRect(rect, paint)
     }

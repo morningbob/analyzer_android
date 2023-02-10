@@ -30,7 +30,7 @@
     <fragment
         android:id="@+id/wifiDevicesFragment"
         android:name="com.bitpunchlab.android.analyzer.wifiDevices.WifiDevicesFragment"
-        android:label="Wifi"
+        android:label="Wifi Devices"
         tools:layout="@layout/fragment_wifi_devices" >
         <action
             android:id="@+id/toDeviceAction"
@@ -44,12 +44,12 @@
     <fragment
         android:id="@+id/compassFragment"
         android:name="com.bitpunchlab.android.analyzer.compass.CompassFragment"
-        android:label="fragment_compass"
+        android:label="Compass"
         tools:layout="@layout/fragment_compass" />
     <fragment
         android:id="@+id/wifiDeviceFragment"
         android:name="com.bitpunchlab.android.analyzer.wifiDevices.WifiDeviceFragment"
-        android:label="WifiDeviceFragment" >
+        android:label="Wifi Device" >
         <argument
             android:name="device"
             app:argType="android.net.wifi.ScanResult" />
@@ -57,7 +57,7 @@
     <fragment
         android:id="@+id/bluetoothDeviceFragment"
         android:name="com.bitpunchlab.android.analyzer.bluetoothDevices.BluetoothDeviceFragment"
-        android:label="BluetoothDeviceFragment" >
+        android:label="Bluetooth Device" >
         <argument
             android:name="device"
             app:argType="android.bluetooth.BluetoothDevice" />
@@ -65,7 +65,7 @@
     <fragment
         android:id="@+id/bluetoothDevicesFragment"
         android:name="com.bitpunchlab.android.analyzer.bluetoothDevices.BluetoothDevicesFragment"
-        android:label="fragment_bluetooth_devices"
+        android:label="Bluetooth Devices"
         tools:layout="@layout/fragment_bluetooth_devices" >
         <action
             android:id="@+id/toBluetoothDeviceAction"

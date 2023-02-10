@@ -3,6 +3,7 @@ package com.bitpunchlab.android.analyzer.main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.Application
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -88,6 +89,9 @@ class MainFragment : Fragment() {
         connectivityManager?.registerNetworkCallback(networkRequest, networkCallback)
         prepareSimCard()
         prepareBattery()
+        checkLocationEnabled()
+        checkWifiEnabled()
+        checkBluetoothEnabled()
         prepareUSB()
 
         val internalCapacity = getInternalStorageCapacity()
@@ -104,16 +108,16 @@ class MainFragment : Fragment() {
 
         if (checkPermission(locationPermissions)) {
             getUserLocation()
-            val enabled = isLocationEnabled()
+            val enabled = checkLocationEnabled()
             Log.i("upon start", "location is enabled? $enabled")
             // show location
             //binding.textviewLatitude.text = "latitude: ${userLocation?.latitude}"
             //binding.textviewLongitude.text = "longitude: ${userLocation?.longitude}"
             binding.textviewLatitude.visibility = View.VISIBLE
             binding.textviewLongitude.visibility = View.VISIBLE
-            binding.textviewGetLocation.visibility = View.GONE
+            //binding.textviewGetLocation.visibility = View.GONE
         } else {
-            binding.textviewGetLocation.visibility = View.VISIBLE
+            //binding.textviewGetLocation.visibility = View.VISIBLE
             binding.textviewLatitude.visibility = View.GONE
             binding.textviewLongitude.visibility = View.GONE
             //binding.textviewGetLocation.visibility = View.VISIBLE
@@ -129,13 +133,13 @@ class MainFragment : Fragment() {
 
         // prepare bluetooth display
         if (checkPermission(bluetoothPermissions)) {
-            binding.blueStatus.visibility = View.VISIBLE
-            binding.blueDevice.visibility = View.VISIBLE
-            binding.buttonCheckBlue.visibility = View.GONE
+            //binding.blueStatus.visibility = View.VISIBLE
+            //binding.blueDevice.visibility = View.VISIBLE
+            //binding.buttonCheckBlue.visibility = View.GONE
         } else {
-            binding.buttonCheckBlue.visibility = View.VISIBLE
-            binding.blueStatus.visibility = View.GONE
-            binding.blueDevice.visibility = View.GONE
+            //binding.buttonCheckBlue.visibility = View.VISIBLE
+            //binding.blueStatus.visibility = View.GONE
+            //binding.blueDevice.visibility = View.GONE
         }
 
         userLocation.observe(viewLifecycleOwner, Observer { location ->
@@ -148,9 +152,9 @@ class MainFragment : Fragment() {
 
         bluetoothName.observe(viewLifecycleOwner, Observer { name ->
             if (name != null) {
-                binding.blueStatus.text = "Connected: $name"
+                binding.blueDevice.text = "Connected: $name"
             } else {
-                binding.blueStatus.text = "Not Connected"
+                binding.blueDevice.text = "Not Connected"
             }
         })
 
@@ -186,9 +190,9 @@ class MainFragment : Fragment() {
             }
         }
 
-        binding.buttonCheckBlue.setOnClickListener {
-            prepareBluetooth()
-        }
+        //binding.buttonCheckBlue.setOnClickListener {
+            //prepareBluetooth()
+        //}
 
         binding.compassLayout.setOnClickListener {
             findNavController().navigate(R.id.toCompassAction)
@@ -215,13 +219,13 @@ class MainFragment : Fragment() {
         // the app can react immediately to detect the bluetooth and show it
         isBluetoothPermissionGranted.observe(viewLifecycleOwner, Observer { granted ->
             if (granted != null && granted == true) {
-                binding.buttonCheckBlue.visibility = View.GONE
-                binding.blueStatus.visibility = View.VISIBLE
+                //binding.buttonCheckBlue.visibility = View.GONE
+                //binding.blueStatus.visibility = View.VISIBLE
                 binding.blueDevice.visibility = View.VISIBLE
                 prepareBluetooth()
             } else if (granted == false) {
-                binding.buttonCheckBlue.visibility = View.VISIBLE
-                binding.blueStatus.visibility = View.GONE
+                //binding.buttonCheckBlue.visibility = View.VISIBLE
+                //binding.blueStatus.visibility = View.GONE
                 binding.blueDevice.visibility = View.GONE
             }
         })
@@ -354,6 +358,36 @@ class MainFragment : Fragment() {
         return Pair(memInfo.totalMem, memInfo.availMem)
     }
 
+    private fun checkLocationEnabled() : Boolean {
+        val locationManager = requireContext().getSystemService<LocationManager>()
+        val gpsLocationEnable = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val networkLocationEnable = locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        if (gpsLocationEnable == true && networkLocationEnable == true) {
+            binding.textviewGetLocation.text = getString(R.string.location_enabled)
+        } else if (gpsLocationEnable == true) {
+            binding.textviewGetLocation.text = getString(R.string.only_gps_enabled)
+        } else if (networkLocationEnable == true) {
+            binding.textviewGetLocation.text = getString(R.string.only_network_enabled)
+        } else {
+            binding.textviewGetLocation.text = getString(R.string.location_disabled)
+        }
+        return gpsLocationEnable == true && networkLocationEnable == true
+    }
+
+    private fun checkWifiEnabled() {
+        if (checkPermission(wifiPermissions)) {
+            isWifiPermissionGranted.value = true
+        } else {
+            //binding.wifiStatus.text = getString(R.string.requires_permission)
+        }
+        val wifiManager = requireContext().getSystemService<WifiManager>()
+        if (wifiManager?.isWifiEnabled == true) {
+            binding.wifiStatus.text = getString(R.string.wifi_enabled)
+        } else {
+            binding.wifiStatus.text = getString(R.string.wifi_disabled)
+        }
+    }
+
     private val wifiPermissionsResultLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -419,6 +453,18 @@ class MainFragment : Fragment() {
             }
             //isBluetoothPermissionGranted.postValue(allResults)
         }
+
+    private fun checkBluetoothEnabled() {
+        if (checkPermission(bluetoothPermissions)) {
+            isBluetoothPermissionGranted.value = true
+        }
+        val bluetoothManager = requireContext().getSystemService<BluetoothManager>() as BluetoothManager
+        if (bluetoothManager.adapter.isEnabled) {
+            binding.blueStatus.text = getString(R.string.bluetooth_enabled)
+        } else {
+            binding.blueStatus.text = getString(R.string.bluetooth_disabled)
+        }
+    }
 
     private val locationPermissions =
         arrayOf(
